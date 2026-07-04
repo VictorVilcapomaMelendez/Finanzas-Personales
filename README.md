@@ -1,150 +1,172 @@
-# 💼 Dashboard Financiero Inteligente (Google Apps Script + Web Dashboard)
+# 💼 Dashboard Inteligente de Finanzas Personales
 
-Un tablero financiero pensado para personas reales: claro, visual y accionable.
+Una aplicación web diseñada para transformar registros financieros en información clara, visual y accionable.
 
-Este proyecto nacio para ayudar a controlar ingresos, egresos y presupuesto mensual en una sola vista, con analitica descriptiva (que paso) y prescriptiva/predictiva (que deberias hacer).
+Este proyecto centraliza ingresos, gastos, presupuesto y ahorro en un único dashboard interactivo, permitiendo comprender la situación financiera de forma sencilla mediante indicadores, gráficos y recomendaciones.
 
----
-
-## ✨ Que es este proyecto
-
-## 🌐 Demo publica
-
-Puedes ver la version publicada del tablero en:
-
-https://victorvilcapomamelendez.github.io/Finanzas-Personales/
+Además de mostrar lo que ha ocurrido, el tablero incorpora análisis descriptivo, predictivo y prescriptivo para apoyar una mejor toma de decisiones.
 
 ---
 
-Este repositorio muestra **dos capas** del mismo producto:
+# 🌐 Demo
 
-1. **Producto completo (Apps Script)**
-   - Backend en Google Apps Script conectado a Google Sheets.
-   - Motor de calculo de KPIs, tendencias, alertas y proyecciones.
-   - Dashboard web para uso diario.
+🚀 **Explora la versión pública del dashboard aquí:**
 
-2. **Version publicable en GitHub (skeleton/demo)**
-   - Version estatica en `portfolio-demo/index.html`.
-   - Datos ficticios hardcodeados (sin datos privados).
-   - Sirve como **framework base** para que otra persona cree su propio dashboard parecido.
+👉 **https://victorvilcapomamelendez.github.io/Finanzas-Personales/**
 
-En resumen: en GitHub se publica el "esqueleto" profesional, no la operacion privada de produccion.
+> **Importante**
+>
+> La versión publicada utiliza exclusivamente datos ficticios generados para fines demostrativos.
+>
+> No contiene información personal, financiera ni conexiones a servicios privados.
 
 ---
 
-## 🎯 Problema que resuelve
+# ✨ ¿Qué encontrarás en este proyecto?
 
-La mayoria de personas ve sus finanzas en tablas sueltas, sin contexto ni prioridad.
+Este repositorio muestra dos versiones del mismo producto:
 
-Este dashboard convierte eso en decisiones claras:
-- cuanto ingreso,
-- cuanto gasto,
-- en que se me va el dinero,
-- si voy bien o mal contra mi presupuesto,
-- y que debo hacer para llegar a mi meta.
+## 🔹 Aplicación completa
 
----
+Desarrollada sobre Google Apps Script.
 
-## 🚀 Lo mas potente del proyecto
+Incluye:
 
-### 1) Control integral de ingresos vs egresos
-- KPIs principales (ingresos, egresos, balance, gasto diario, ratio de ahorro).
-- Analisis por categoria, medio de pago y comportamiento mensual.
-
-### 2) Alertas de presupuesto en tiempo real
-- Estado por semaforo (verde, amarillo, rojo).
-- Mensajes accionables como "puedes gastar X" o "exceso de Y".
-- Historial de presupuesto por mes para leer disciplina financiera.
-- Semaforizacion automatica por nivel de riesgo para priorizar acciones rapidas.
-
-### 3) Actualizacion automatica cada 5 minutos
-- El tablero refresca para mantener datos recientes sin recargar manualmente.
-- Ideal para seguimiento continuo.
-
-### 4) Reportes en multiples horizontes
-- Lectura semanal para control de habitos de gasto.
-- Lectura mensual para cierre de presupuesto y balance.
-- Lectura anual para evaluar tendencia financiera y avance de metas.
-
-### 5) Vista descriptiva + vista predictiva/prescriptiva
-- **Descriptiva**: explica que paso.
-- **Predictiva**: estima cierre de mes/anio segun tendencia.
-- **Prescriptiva**: sugiere cuanto ahorrar y cuanto gastar para llegar a la meta.
-
-### 6) Experiencia de uso orientada a negocio
-- Filtros rapidos (mes/anio, historico, mes actual).
-- Tabla detallada con busqueda y exportacion CSV.
-- Soporte visual para decisiones (graficos, badges, etiquetas, estados).
-
-### 7) Experiencia visual moderna
-- Modo oscuro/claro para adaptarse al contexto de uso.
-- Interacciones visuales orientadas a lectura rapida de datos.
-- Enfoque en usabilidad para personas no tecnicas.
+- Backend
+- Integración con Google Sheets
+- Procesamiento de reglas de negocio
+- Cálculo de KPIs
+- Alertas
+- Proyecciones financieras
+- Dashboard interactivo
 
 ---
 
-## 🙌 Que ofrece al usuario final
+## 🔹 Versión pública para GitHub
 
-- Menos ansiedad financiera.
-- Mas claridad para decidir en que recortar.
-- Seguimiento de metas de ahorro de forma concreta.
-- Una herramienta simple para gestionar su economia personal o familiar.
+Características:
 
----
+- HTML estático
+- JavaScript puro
+- Datos completamente ficticios
+- Sin credenciales
+- Sin dependencias privadas
+- Compatible con GitHub Pages
 
-## 🧱 Arquitectura (alto nivel)
-
-- **Frontend**: HTML + JavaScript + estilos CSS embebidos en el propio HTML (ApexCharts para visualizacion).
-- **Backend productivo**: Google Apps Script.
-- **Fuente de datos productiva**: Google Sheets.
-- **Version GitHub**: archivo estatico con mock data local.
+Su objetivo es mostrar el funcionamiento del dashboard preservando la privacidad del entorno de producción.
 
 ---
 
-## 🧩 Que compone este proyecto
+# 🎯 ¿Qué problema resuelve?
 
-- Logica de negocio en JavaScript para reglas financieras, KPIs, alertas y proyecciones.
-- Interfaz web en HTML con visualizaciones y experiencia interactiva.
-- Integracion con Google Apps Script para escenarios productivos.
-- Version demo estatica para portfolio/GitHub Pages y reutilizacion como framework base.
+Muchas personas registran sus movimientos financieros, pero les resulta difícil convertir esos datos en información útil para tomar decisiones.
 
----
+Este dashboard responde preguntas como:
 
-## 🧪 Como usar la demo estatica
+- 💰 ¿Cuánto ingresé este mes?
+- 🛒 ¿En qué estoy gastando más?
+- 📉 ¿Estoy respetando mi presupuesto?
+- 📈 ¿Cómo evoluciona mi ahorro?
+- 🎯 ¿Qué puedo hacer para alcanzar mi meta financiera?
 
-1. Abre `portfolio-demo/index.html` localmente, o
-2. Publica la carpeta `portfolio-demo/` en GitHub Pages.
-
-La demo ya incluye:
-- filtros,
-- KPIs,
-- semaforizacion de estado financiero,
-- alertas de presupuesto,
-- graficos,
-- tabla de transacciones,
-- modo oscuro/claro,
-- exportacion CSV de la data visible,
-- proyeccion de ahorro.
+El objetivo no es únicamente visualizar información, sino facilitar decisiones mejor fundamentadas.
 
 ---
 
-## ⚙️ Si quieres llevarlo a produccion real
+# Funcionalidades
 
-Flujo recomendado:
+## 📊 Indicadores financieros
 
-1. Conectar Google Sheets con tu estructura de datos.
-2. Activar backend Apps Script con tu logica de negocio.
-3. Ajustar categorias, medios de pago, moneda y reglas de negocio.
-4. Publicar como Web App en Apps Script.
-5. Mantener la version GitHub como showcase/plantilla publica.
+- Ingresos
+- Gastos
+- Balance
+- Ahorro
+- Gasto diario
+- Ratio de ahorro
 
 ---
 
-## 📈 Perfil de valor del proyecto
+## 🚦 Seguimiento del presupuesto
 
-Este no es solo un dashboard bonito.
-Es un sistema de apoyo a decisiones financieras personales:
+- Estado mediante semáforo
+- Alertas inteligentes
+- Seguimiento mensual
+- Recomendaciones según el comportamiento del gasto
 
-- **Descriptivo** (explica el pasado),
-- **Predictivo** (anticipa escenarios),
-- **Prescriptivo** (recomienda acciones concretas).
+---
+
+## 📈 Visualizaciones interactivas
+
+- Evolución mensual
+- Distribución por categorías
+- Medios de pago
+- Tendencias
+- Comparativos históricos
+
+---
+
+## 🔮 Analítica integrada
+
+El dashboard combina tres niveles de análisis:
+
+### 📌 Descriptivo
+
+Explica qué ocurrió.
+
+### 📌 Predictivo
+
+Estima el cierre del mes y del año según la tendencia actual.
+
+### 📌 Prescriptivo
+
+Sugiere acciones para optimizar el ahorro y mantener el presupuesto bajo control.
+
+---
+
+## 🎨 Experiencia de usuario
+
+- 🌙 Modo oscuro y modo claro
+- 📱 Diseño responsive
+- 📊 Gráficos interactivos
+- 🔎 Búsqueda de transacciones
+- 📂 Exportación a CSV
+- ⚡ Navegación rápida
+
+---
+
+# 🛠 Tecnologías utilizadas
+
+- HTML5
+- CSS3
+- JavaScript
+- Google Apps Script
+- Google Sheets
+- ApexCharts
+- GitHub Pages
+
+---
+
+# 🏗 Arquitectura
+
+```text
+Google Sheets
+        │
+        ▼
+Google Apps Script
+        │
+        ▼
+Dashboard Web
+        │
+        ├── Producción (Apps Script)
+        │
+        └── Demo Pública (GitHub Pages)
+```
+
+# 💡 Valor del proyecto
+
+Este proyecto demuestra cómo una aplicación web puede convertir información financiera en una experiencia visual, intuitiva y orientada a la toma de decisiones.
+
+Más allá de presentar indicadores, busca mostrar cómo el análisis de datos puede ayudar a comprender hábitos financieros, anticipar escenarios y apoyar una mejor planificación económica.
+
+---
+¡Gracias por visitarlo! 😊
