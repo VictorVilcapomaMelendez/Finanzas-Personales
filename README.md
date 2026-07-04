@@ -1,4 +1,4 @@
-# Dashboard Financiero Inteligente (Google Apps Script + Web Dashboard)
+# 💼 Dashboard Financiero Inteligente (Google Apps Script + Web Dashboard)
 
 Un tablero financiero pensado para personas reales: claro, visual y accionable.
 
@@ -6,7 +6,15 @@ Este proyecto nacio para ayudar a controlar ingresos, egresos y presupuesto mens
 
 ---
 
-## Que es este proyecto
+## ✨ Que es este proyecto
+
+## 🌐 Demo publica
+
+Puedes ver la version publicada del tablero en:
+
+https://victorvilcapomamelendez.github.io/Finanzas-Personales/
+
+---
 
 Este repositorio muestra **dos capas** del mismo producto:
 
@@ -24,7 +32,7 @@ En resumen: en GitHub se publica el "esqueleto" profesional, no la operacion pri
 
 ---
 
-## Problema que resuelve
+## 🎯 Problema que resuelve
 
 La mayoria de personas ve sus finanzas en tablas sueltas, sin contexto ni prioridad.
 
@@ -37,7 +45,7 @@ Este dashboard convierte eso en decisiones claras:
 
 ---
 
-## Lo mas potente del proyecto
+## 🚀 Lo mas potente del proyecto
 
 ### 1) Control integral de ingresos vs egresos
 - KPIs principales (ingresos, egresos, balance, gasto diario, ratio de ahorro).
@@ -47,24 +55,35 @@ Este dashboard convierte eso en decisiones claras:
 - Estado por semaforo (verde, amarillo, rojo).
 - Mensajes accionables como "puedes gastar X" o "exceso de Y".
 - Historial de presupuesto por mes para leer disciplina financiera.
+- Semaforizacion automatica por nivel de riesgo para priorizar acciones rapidas.
 
 ### 3) Actualizacion automatica cada 5 minutos
 - El tablero refresca para mantener datos recientes sin recargar manualmente.
 - Ideal para seguimiento continuo.
 
-### 4) Vista descriptiva + vista predictiva/prescriptiva
+### 4) Reportes en multiples horizontes
+- Lectura semanal para control de habitos de gasto.
+- Lectura mensual para cierre de presupuesto y balance.
+- Lectura anual para evaluar tendencia financiera y avance de metas.
+
+### 5) Vista descriptiva + vista predictiva/prescriptiva
 - **Descriptiva**: explica que paso.
 - **Predictiva**: estima cierre de mes/anio segun tendencia.
 - **Prescriptiva**: sugiere cuanto ahorrar y cuanto gastar para llegar a la meta.
 
-### 5) Experiencia de uso orientada a negocio
+### 6) Experiencia de uso orientada a negocio
 - Filtros rapidos (mes/anio, historico, mes actual).
 - Tabla detallada con busqueda y exportacion CSV.
 - Soporte visual para decisiones (graficos, badges, etiquetas, estados).
 
+### 7) Experiencia visual moderna
+- Modo oscuro/claro para adaptarse al contexto de uso.
+- Interacciones visuales orientadas a lectura rapida de datos.
+- Enfoque en usabilidad para personas no tecnicas.
+
 ---
 
-## Que ofrece al usuario final
+## 🙌 Que ofrece al usuario final
 
 - Menos ansiedad financiera.
 - Mas claridad para decidir en que recortar.
@@ -73,38 +92,25 @@ Este dashboard convierte eso en decisiones claras:
 
 ---
 
-## Arquitectura (alto nivel)
+## 🧱 Arquitectura (alto nivel)
 
-- **Frontend**: HTML + CSS + JavaScript (ApexCharts para visualizacion).
+- **Frontend**: HTML + JavaScript + estilos CSS embebidos en el propio HTML (ApexCharts para visualizacion).
 - **Backend productivo**: Google Apps Script.
 - **Fuente de datos productiva**: Google Sheets.
 - **Version GitHub**: archivo estatico con mock data local.
 
 ---
 
-## Contenido del repo
+## 🧩 Que compone este proyecto
 
-- `code.js` -> logica principal del backend Apps Script.
-- `Finanzas.js` -> funciones de negocio/calculo financiero.
-- `index.html` -> vista principal del dashboard (entorno Apps Script).
-- `portfolio-demo/index.html` -> version estatica para portfolio/GitHub Pages.
-
----
-
-## Importante para GitHub
-
-Lo que se publica en GitHub es **solo la base visual y funcional** del tablero:
-
-- Sin credenciales.
-- Sin links privados.
-- Sin dependencias de datos sensibles.
-- Con datos de ejemplo.
-
-Esto permite que otras personas lo usen como plantilla/framework y lo adapten a su realidad.
+- Logica de negocio en JavaScript para reglas financieras, KPIs, alertas y proyecciones.
+- Interfaz web en HTML con visualizaciones y experiencia interactiva.
+- Integracion con Google Apps Script para escenarios productivos.
+- Version demo estatica para portfolio/GitHub Pages y reutilizacion como framework base.
 
 ---
 
-## Como usar la demo estatica
+## 🧪 Como usar la demo estatica
 
 1. Abre `portfolio-demo/index.html` localmente, o
 2. Publica la carpeta `portfolio-demo/` en GitHub Pages.
@@ -112,38 +118,33 @@ Esto permite que otras personas lo usen como plantilla/framework y lo adapten a 
 La demo ya incluye:
 - filtros,
 - KPIs,
+- semaforizacion de estado financiero,
 - alertas de presupuesto,
 - graficos,
 - tabla de transacciones,
+- modo oscuro/claro,
+- exportacion CSV de la data visible,
 - proyeccion de ahorro.
 
 ---
 
-## Si quieres llevarlo a produccion real
+## ⚙️ Si quieres llevarlo a produccion real
 
 Flujo recomendado:
 
 1. Conectar Google Sheets con tu estructura de datos.
-2. Activar backend Apps Script (`code.js` + `Finanzas.js`).
+2. Activar backend Apps Script con tu logica de negocio.
 3. Ajustar categorias, medios de pago, moneda y reglas de negocio.
 4. Publicar como Web App en Apps Script.
 5. Mantener la version GitHub como showcase/plantilla publica.
 
 ---
 
-## Perfil de valor del proyecto
+## 📈 Perfil de valor del proyecto
 
 Este no es solo un dashboard bonito.
 Es un sistema de apoyo a decisiones financieras personales:
 
-- **Descriptivo** (te explica el pasado),
-- **Predictivo** (te anticipa escenarios),
-- **Prescriptivo** (te recomienda acciones concretas).
-
-Si buscas un framework base para construir una app financiera moderna con Apps Script, este proyecto te da un gran punto de partida.
-
----
-
-## Licencia
-
-Define aqui la licencia que prefieras (por ejemplo MIT) antes de abrir colaboraciones publicas.
+- **Descriptivo** (explica el pasado),
+- **Predictivo** (anticipa escenarios),
+- **Prescriptivo** (recomienda acciones concretas).
