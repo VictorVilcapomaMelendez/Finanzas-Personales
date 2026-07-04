@@ -17,9 +17,6 @@ Además de mostrar lo que ha ocurrido, el sistema incorpora análisis descriptiv
 > **Importante**
 >
 > La versión publicada utiliza exclusivamente datos ficticios generados para fines demostrativos.
->
-> No contiene información personal, financiera ni conexiones a servicios privados.
-
 ---
 
 # ✨ ¿Qué hace este proyecto?
