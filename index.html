@@ -1,4 +1,4 @@
-﻿  <!--
+  <!--
     Dashboard Financiero Personal - Portfolio Demo
     Version estatica para portafolio profesional (GitHub Pages).
     Todos los datos mostrados son ficticios y generados localmente.
@@ -433,6 +433,12 @@
         [data-theme="dark"] .filters button.btn-shortcut.active .shortcut-hint { color: rgba(8,47,73,0.76); }
         [data-theme="dark"] .filters button.btn-clear .shortcut-hint { color: rgba(8,47,73,0.68); }
 
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
       html, body {
         margin: 0; padding: 0;
         background:
@@ -497,6 +503,18 @@
       }
 
       .container { width: 95%; max-width: 1400px; margin: 0 auto 44px auto; padding-top: 24px; }
+
+      .grid > *,
+      .kpi-row > *,
+      .forecast-grid > *,
+      .meta-stats > *,
+      .forecast-months > *,
+      .forecast-plan-grid > *,
+      .fp-dep-form-row > *,
+      .fp-dep-stats > *,
+      .fp-dep-goal-grid > * {
+        min-width: 0;
+      }
 
       #errorMsg {
         display: none; background-color: #FFEBEE; color: var(--red); padding: 12px;
@@ -1596,20 +1614,38 @@
         RESPONSIVE ? TABLET  (= 768px)
       ------------------------------------------ */
       @media (max-width: 768px) {
-        .header { height: 64px; }
+        .header {
+          min-height: 64px;
+          padding: 10px 10px 12px;
+        }
         .header h1 { font-size: 18px; }
         .header p  { font-size: 11px; }
 
         .filters {
-          top: 64px;
+          position: static;
           gap: 10px;
-          padding: 10px 12px;
-          /* En tablet los controles se comprimen pero no apilan */
+          padding: 12px;
+          align-items: stretch;
+        }
+        .filters .group {
+          flex: 1 1 220px;
+          min-width: 0;
         }
         .filters label { font-size: 12px; }
         .filters input[type="date"],
-        .filters select { font-size: 12px; padding: 6px 8px; }
+        .filters select {
+          width: 100%;
+          font-size: 12px;
+          padding: 8px 9px;
+        }
         .filters button { padding: 7px 12px; font-size: 12px; }
+        .filters button,
+        .btn-clear {
+          flex: 1 1 220px;
+        }
+        #txSearchInput {
+          width: min(320px, 100%);
+        }
 
         .filter-separator { border-left: none; padding-left: 0; margin-left: 0; }
 
@@ -2151,28 +2187,37 @@
         RESPONSIVE ? M?VIL  (= 480px)
       ------------------------------------------ */
       @media (max-width: 480px) {
-        .header { height: 56px; }
+        .header {
+          min-height: 56px;
+          padding: 8px 10px 10px;
+        }
         .header h1 { font-size: 16px; }
         .header p  { display: none; } /* Ocultar subt?tulo para ganar espacio */
 
-        .container { padding-top: 16px; }
+        .container {
+          width: 96%;
+          padding-top: 14px;
+        }
 
         .filters {
-          top: 56px;
-          /* En m?vil los filtros se vuelven scrollables horizontalmente en lugar de apilarse,
-            as? no ocupan mucho espacio vertical pegados en la parte superior */
-          flex-wrap: nowrap;
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-          padding: 8px 12px;
+          position: static;
+          flex-wrap: wrap;
+          overflow: visible;
+          padding: 10px;
           gap: 8px;
-          scrollbar-width: none; /* Ocultar scrollbar del filtro */
+          border-radius: 14px;
         }
-        .filters::-webkit-scrollbar { display: none; }
-        .filters .group { flex-shrink: 0; }
+        .filters .group {
+          flex: 1 1 100%;
+          min-width: 0;
+        }
+        .filters button,
+        .btn-clear {
+          width: 100%;
+        }
         .loading-indicator { display: none; } /* El loader no se ve bien en bandas peque?as */
 
-        .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .kpi-row { grid-template-columns: 1fr; gap: 10px; }
         .kpi-card { height: auto; padding: 12px; }
         .kpi-title { font-size: 10px; }
         .kpi-value { font-size: 18px; }
@@ -2207,6 +2252,24 @@
           min-width: 0;
           font-size: 10px;
           padding: 8px 10px;
+        }
+        .tx-header,
+        .tx-controls {
+          width: 100%;
+        }
+        .tx-controls {
+          gap: 8px;
+        }
+        #txSearchInput,
+        #btnExportCsv {
+          width: 100%;
+        }
+        .tx-pagination {
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .tx-page-btn {
+          flex: 1 1 130px;
         }
         #chart-evolucion { grid-column: span 12; }
         #btnTop { width: 38px; height: 38px; font-size: 17px; bottom: 16px; right: 16px; }
@@ -2363,8 +2426,9 @@
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.15s ease;
-        max-width: 320px;
-        min-width: 240px;
+        width: min(320px, 92vw);
+        max-width: min(320px, 92vw);
+        min-width: 0;
       }
       #txTooltip.visible { opacity: 1; }
       .txtt-card {
@@ -2506,7 +2570,7 @@
       @media (max-width: 600px) {
         .tx-table td, .tx-table thead th { padding: 8px 10px; font-size: 12px; }
         .tx-section { padding: 14px; }
-        .filters { top: 72px; padding: 12px 14px; }
+        .filters { padding: 10px 12px; }
         .chart-card, .kpi-card, .tx-section, .meta-panel, .alerts-panel { border-radius: 16px; }
         .grid { gap: 14px; }
         .kpi-row { gap: 14px; }
@@ -5131,9 +5195,58 @@
 
       let charts = {};
 
+      let responsiveChartResizeTimer = null;
+
+      function getResponsiveChartHeights() {
+        const w = window.innerWidth || document.documentElement.clientWidth || 1280;
+        if (w <= 420) {
+          return { evolucion: 220, distribucion: 260, medioPago: 220, cierreCaja: 220, ingVsEgr: 220, forecastTrend: 230, depSalary: 210 };
+        }
+        if (w <= 600) {
+          return { evolucion: 240, distribucion: 280, medioPago: 240, cierreCaja: 240, ingVsEgr: 240, forecastTrend: 250, depSalary: 220 };
+        }
+        if (w <= 900) {
+          return { evolucion: 280, distribucion: 320, medioPago: 280, cierreCaja: 280, ingVsEgr: 280, forecastTrend: 280, depSalary: 240 };
+        }
+        return { evolucion: 320, distribucion: 360, medioPago: 320, cierreCaja: 320, ingVsEgr: 320, forecastTrend: 320, depSalary: 280 };
+      }
+
+      function applyResponsiveChartHeights() {
+        const h = getResponsiveChartHeights();
+        const chartKeys = [
+          ['evolucion', h.evolucion],
+          ['distribucion', h.distribucion],
+          ['medioPago', h.medioPago],
+          ['cierreCaja', h.cierreCaja],
+          ['ingVsEgr', h.ingVsEgr],
+          ['forecastTrend', h.forecastTrend],
+          ['depSalary', h.depSalary]
+        ];
+
+        chartKeys.forEach(function(pair) {
+          const key = pair[0];
+          const height = pair[1];
+          if (charts[key]) {
+            charts[key].updateOptions({ chart: { height: height } }, false, false);
+          }
+        });
+      }
+
+      function scheduleResponsiveChartHeights() {
+        if (responsiveChartResizeTimer) {
+          clearTimeout(responsiveChartResizeTimer);
+        }
+        responsiveChartResizeTimer = setTimeout(function() {
+          applyResponsiveChartHeights();
+          responsiveChartResizeTimer = null;
+        }, 120);
+      }
+
       function initCharts() {
+        const chartHeights = getResponsiveChartHeights();
+
         charts.evolucion = new ApexCharts(document.querySelector("#chartEvolucionCanvas"), {
-          chart: { type: 'area', height: 320, toolbar: { show: false }, zoom: { enabled: false } },
+          chart: { type: 'area', height: chartHeights.evolucion, toolbar: { show: false }, zoom: { enabled: false } },
           colors: [COLORS.ingreso, COLORS.egreso],
           fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] } },
           stroke: { curve: 'smooth', width: 2 },
@@ -5215,7 +5328,7 @@
         charts.evolucion.render();
 
         charts.distribucion = new ApexCharts(document.querySelector("#chartDistribucionCanvas"), {
-          chart: { type: 'donut', height: 360, toolbar: { show: false } },
+          chart: { type: 'donut', height: chartHeights.distribucion, toolbar: { show: false } },
           colors: COLORS.donut,
           stroke: { show: true, colors: ['#fff'], width: 2 },
           dataLabels: {
@@ -5249,7 +5362,7 @@
         charts.distribucion.render();
 
         charts.medioPago = new ApexCharts(document.querySelector("#chartMedioPagoCanvas"), {
-          chart: { type: 'bar', height: 320, toolbar: { show: false } },
+          chart: { type: 'bar', height: chartHeights.medioPago, toolbar: { show: false } },
           grid: { padding: { top: 16 } },
           colors: [ function({ dataPointIndex, w }) {
             const cat = w.config.xaxis.categories[dataPointIndex];
@@ -5266,7 +5379,7 @@
         charts.medioPago.render();
 
         charts.cierreCaja = new ApexCharts(document.querySelector("#chartCierreCajaCanvas"), {
-          chart: { type: 'bar', height: 320, toolbar: { show: false } },
+          chart: { type: 'bar', height: chartHeights.cierreCaja, toolbar: { show: false } },
           colors: [ function({ value }) { return value < 0 ? COLORS.egreso : COLORS.ingreso; } ],
           plotOptions: { bar: { borderRadius: 2, columnWidth: '60%' } },
           dataLabels: { enabled: false },
@@ -5279,7 +5392,7 @@
         charts.cierreCaja.render();
 
         charts.ingVsEgr = new ApexCharts(document.querySelector("#chartIngVsEgrMesCanvas"), {
-          chart: { type: 'bar', height: 320, stacked: true, toolbar: { show: false } },
+          chart: { type: 'bar', height: chartHeights.ingVsEgr, stacked: true, toolbar: { show: false } },
           colors: [COLORS.ingreso, COLORS.egreso],
           plotOptions: { bar: { borderRadius: 2, columnWidth: '55%' } },
           dataLabels: { enabled: false },
@@ -5293,7 +5406,7 @@
         charts.ingVsEgr.render();
 
         charts.forecastTrend = new ApexCharts(document.querySelector("#chartForecastTrend"), {
-          chart: { type: 'line', height: 320, toolbar: { show: false }, zoom: { enabled: false } },
+          chart: { type: 'line', height: chartHeights.forecastTrend, toolbar: { show: false }, zoom: { enabled: false } },
           colors: [COLORS.ingreso, COLORS.egreso, COLORS.ingreso, COLORS.egreso],
           stroke: { curve: 'smooth', width: [3, 3, 3, 3], dashArray: [0, 0, 7, 7] },
           markers: { size: 3, hover: { size: 5 } },
@@ -6035,7 +6148,7 @@
         const tt   = _ttEl();
         const W    = window.innerWidth;
         const H    = window.innerHeight;
-        const ttW  = 320 + 32; // max-width + padding safety
+        const ttW  = (tt.offsetWidth || 280) + 24;
         const ttH  = tt.offsetHeight || 280;
         const GAP  = 14;
         let   left = mx + GAP;
@@ -7157,8 +7270,9 @@
         if (panel && panel.style.display === 'none') return;
         // Series:  0=IncomeActual 1=IncomeProjec  2=SpendActual 3=SpendProjected
         // Colors:  verde           indigo           naranja       ?mbar
+        var chartHeights = getResponsiveChartHeights();
         charts.depSalary = new ApexCharts(el, {
-          chart: { type: 'line', height: 280, toolbar: { show: false }, zoom: { enabled: false } },
+          chart: { type: 'line', height: chartHeights.depSalary, toolbar: { show: false }, zoom: { enabled: false } },
           colors: [COLORS.ingreso, '#6366F1', '#EA580C', '#F59E0B'],
           stroke: { curve: 'smooth', width: [3, 2, 2, 2], dashArray: [0, 6, 0, 5] },
           markers: { size: [3, 3, 3, 3], hover: { size: 5 } },
@@ -7462,10 +7576,12 @@
 
       document.addEventListener('DOMContentLoaded', () => {
         initCharts();
+        applyResponsiveChartHeights();
         initChartTooltips();
         initDepWorkerState();
         initTxTableSort();
         loadCategoriesAndInit();
+        window.addEventListener('resize', scheduleResponsiveChartHeights);
 
         // Dark mode toggle
         const btnDark = document.getElementById('btnDark');
