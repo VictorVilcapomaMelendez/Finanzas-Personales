@@ -24,22 +24,6 @@ Además de mostrar lo que ha ocurrido, el tablero incorpora análisis descriptiv
 
 Este repositorio muestra dos versiones del mismo producto:
 
-## 🔹 Aplicación completa
-
-Desarrollada sobre Google Apps Script.
-
-Incluye:
-
-- Backend
-- Integración con Google Sheets
-- Procesamiento de reglas de negocio
-- Cálculo de KPIs
-- Alertas
-- Proyecciones financieras
-- Dashboard interactivo
-
----
-
 ## 🔹 Versión pública para GitHub
 
 Características:
