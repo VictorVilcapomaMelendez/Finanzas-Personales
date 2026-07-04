@@ -1605,7 +1605,7 @@
       #chart-cierre-caja    { grid-column: span 6; }
       #chart-ing-vs-egr-mes { grid-column: span 6; }
 
-      @media (max-width: 900px) {
+      @media (max-width: 1px) {
         #chart-distribucion, #chart-medio-pago, #chart-cierre-caja, #chart-ing-vs-egr-mes { grid-column: span 12; }
         .forecast-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
@@ -1613,7 +1613,7 @@
       /* ------------------------------------------
         RESPONSIVE ? TABLET  (= 768px)
       ------------------------------------------ */
-      @media (max-width: 768px) {
+      @media (max-width: 1px) {
         .header {
           min-height: 64px;
           padding: 10px 10px 12px;
@@ -2186,7 +2186,7 @@
       /* ------------------------------------------
         RESPONSIVE ? M?VIL  (= 480px)
       ------------------------------------------ */
-      @media (max-width: 480px) {
+      @media (max-width: 1px) {
         .header {
           min-height: 56px;
           padding: 8px 10px 10px;
@@ -2567,7 +2567,7 @@
         70% { background: rgba(56,189,248,0.08); }
         100% { background: transparent; }
       }
-      @media (max-width: 600px) {
+      @media (max-width: 1px) {
         .tx-table td, .tx-table thead th { padding: 8px 10px; font-size: 12px; }
         .tx-section { padding: 14px; }
         .filters { padding: 10px 12px; }
@@ -5198,17 +5198,15 @@
       let responsiveChartResizeTimer = null;
 
       function getResponsiveChartHeights() {
-        const w = window.innerWidth || document.documentElement.clientWidth || 1280;
-        if (w <= 420) {
-          return { evolucion: 220, distribucion: 260, medioPago: 220, cierreCaja: 220, ingVsEgr: 220, forecastTrend: 230, depSalary: 210 };
-        }
-        if (w <= 600) {
-          return { evolucion: 240, distribucion: 280, medioPago: 240, cierreCaja: 240, ingVsEgr: 240, forecastTrend: 250, depSalary: 220 };
-        }
-        if (w <= 900) {
-          return { evolucion: 280, distribucion: 320, medioPago: 280, cierreCaja: 280, ingVsEgr: 280, forecastTrend: 280, depSalary: 240 };
-        }
-        return { evolucion: 320, distribucion: 360, medioPago: 320, cierreCaja: 320, ingVsEgr: 320, forecastTrend: 320, depSalary: 280 };
+        return {
+          evolucion: 320,
+          distribucion: 360,
+          medioPago: 320,
+          cierreCaja: 320,
+          ingVsEgr: 320,
+          forecastTrend: 320,
+          depSalary: 280
+        };
       }
 
       function applyResponsiveChartHeights() {
