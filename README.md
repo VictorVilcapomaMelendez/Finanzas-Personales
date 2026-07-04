@@ -199,24 +199,6 @@ Sugiere acciones para optimizar el presupuesto y alcanzar objetivos de ahorro.
 
 ---
 
-# 🌐 Versión pública del proyecto
-
-Por motivos de privacidad, este repositorio contiene una versión adaptada específicamente para GitHub Pages.
-
-Esta versión mantiene la experiencia visual y funcional del dashboard utilizando datos completamente ficticios.
-
-No incluye:
-
-- Credenciales.
-- API Keys.
-- Información personal.
-- Datos financieros reales.
-- Conexiones a servicios privados.
-
-Su propósito es mostrar el funcionamiento del sistema preservando la privacidad del entorno de producción.
-
----
-
 # 💡 Valor del proyecto
 
 Este proyecto demuestra cómo combinar automatización, procesamiento de datos y visualización para construir una solución orientada a la toma de decisiones.
