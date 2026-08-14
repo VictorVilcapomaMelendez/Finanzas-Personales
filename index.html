@@ -5039,14 +5039,27 @@
       let responsiveChartResizeTimer = null;
 
       function getResponsiveChartHeights() {
+        // Los gráficos no deben usar una altura fija: a 100% de zoom el
+        // viewport puede ser menor y ApexCharts termina dibujando más alto
+        // que su contenedor, ocultando la parte inferior del eje Y.
+        // Medimos el espacio real disponible después de que el grid haya
+        // calculado sus dimensiones.
+        const mobile = document.body.classList.contains('mobile-mode');
+        const measure = (id, fallback) => {
+          const el = document.getElementById(id);
+          const available = el ? Math.floor(el.getBoundingClientRect().height) : 0;
+          const min = mobile ? 190 : 180;
+          const max = mobile ? 520 : 360;
+          return Math.max(min, Math.min(max, available || fallback));
+        };
         return {
-          evolucion: 320,
-          distribucion: 360,
-          medioPago: 320,
-          cierreCaja: 320,
-          ingVsEgr: 320,
-          forecastTrend: 320,
-          depSalary: 280
+          evolucion: measure('chartEvolucionCanvas', mobile ? 300 : 260),
+          distribucion: measure('chartDistribucionCanvas', mobile ? 300 : 260),
+          medioPago: measure('chartMedioPagoCanvas', mobile ? 300 : 260),
+          cierreCaja: measure('chartCierreCajaCanvas', mobile ? 300 : 260),
+          ingVsEgr: measure('chartIngVsEgrMesCanvas', mobile ? 300 : 260),
+          forecastTrend: measure('chartForecastTrend', mobile ? 340 : 280),
+          depSalary: measure('chartDepSalary', mobile ? 280 : 240)
         };
       }
 
@@ -5077,8 +5090,14 @@
         }
         responsiveChartResizeTimer = setTimeout(function() {
           applyResponsiveChartHeights();
+          requestAnimationFrame(function() {
+            applyResponsiveChartHeights();
+            Object.values(charts || {}).filter(Boolean).forEach(function(chart) {
+              if (chart && typeof chart.resize === 'function') chart.resize();
+            });
+          });
           responsiveChartResizeTimer = null;
-        }, 120);
+        }, 180);
       }
 
       function initCharts() {
