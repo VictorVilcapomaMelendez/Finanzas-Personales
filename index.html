@@ -1984,6 +1984,317 @@
       body.mobile-mode .mobile-mode-trigger .mobile-mode-trigger-label { display: none; }
     }
 
+    /* ══════════════════════════════════════════════════════════════
+       [MOBILE HARDENING — PORTFOLIO DEMO]
+       Evita desbordes horizontales y colisiones de controles.
+       La composición desktop permanece intacta.
+       ══════════════════════════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      html, body {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden !important;
+      }
+
+      body.mobile-mode,
+      body.mobile-mode #appShell,
+      body.mobile-mode .app-shell,
+      body.mobile-mode .main-canvas,
+      body.mobile-mode .canvas-body,
+      body.mobile-mode #descriptiveView,
+      body.mobile-mode #forecastView {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+      }
+
+      body.mobile-mode .top-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 7px;
+        min-height: 88px;
+        padding: 8px 10px;
+        align-items: center;
+      }
+      body.mobile-mode .header-left,
+      body.mobile-mode .header-right {
+        width: 100%;
+        min-width: 0;
+      }
+      body.mobile-mode .header-left {
+        justify-content: flex-start;
+        gap: 6px;
+      }
+      body.mobile-mode .header-right {
+        justify-content: flex-end;
+        gap: 7px;
+      }
+      body.mobile-mode .portfolio-demo-badge {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 10px;
+      }
+      body.mobile-mode .period-chip {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      body.mobile-mode .btn-filter-trigger,
+      body.mobile-mode .mobile-mode-trigger {
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: 50%;
+        justify-content: center;
+      }
+
+      body.mobile-mode .canvas-body {
+        padding: 9px;
+        gap: 9px;
+      }
+
+      /* Todos los hijos de grids pueden encogerse realmente dentro del viewport. */
+      body.mobile-mode .kpi-row-169 > *,
+      body.mobile-mode .charts-grid-middle > *,
+      body.mobile-mode .bottom-grid-169 > *,
+      body.mobile-mode .forecast-kpis-grid > *,
+      body.mobile-mode .forecast-main-grid > *,
+      body.mobile-mode .fp-top-bar > * {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100%;
+      }
+
+      body.mobile-mode .kpi-row-169 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      body.mobile-mode .kpi-card-169 {
+        min-width: 0 !important;
+        overflow: hidden;
+      }
+      body.mobile-mode .kpi-header-169,
+      body.mobile-mode .kpi-footer-169 {
+        min-width: 0;
+      }
+      body.mobile-mode .kpi-header-169 > span:first-child,
+      body.mobile-mode .kpi-footer-169 > span {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      body.mobile-mode .kpi-value-169 {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      body.mobile-mode .charts-grid-middle,
+      body.mobile-mode .bottom-grid-169,
+      body.mobile-mode .forecast-main-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        width: 100% !important;
+      }
+      body.mobile-mode .chart-card-169,
+      body.mobile-mode .dual-chart-card-169,
+      body.mobile-mode .tx-card-169,
+      body.mobile-mode .expense-distribution-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden;
+      }
+
+      body.mobile-mode .chart-header-169 {
+        min-width: 0;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      body.mobile-mode .chart-title-169 {
+        min-width: 0;
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+      body.mobile-mode .chart-subtitle-169 {
+        max-width: 100%;
+        white-space: normal;
+      }
+      body.mobile-mode .chart-toolbar-169 {
+        max-width: 100%;
+        flex-shrink: 0;
+      }
+      body.mobile-mode .chart-body-169 {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden;
+      }
+      body.mobile-mode .chart-canvas-wrapper,
+      body.mobile-mode .apexcharts-canvas,
+      body.mobile-mode .apexcharts-svg {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+      body.mobile-mode .chart-canvas-wrapper {
+        overflow: hidden;
+      }
+
+      /* El switch del gráfico combinado nunca debe aplastarse contra el título. */
+      body.mobile-mode .dual-chart-card-169 .chart-header-169 {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 7px;
+      }
+      body.mobile-mode .dual-tab-switcher {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        min-width: 0;
+      }
+      body.mobile-mode .dual-tab-btn {
+        min-width: 0;
+        width: 100%;
+        padding-inline: 7px;
+        white-space: nowrap;
+      }
+
+      /* Distribución: evita que cantidades largas empujen el lado derecho. */
+      body.mobile-mode .expense-distribution-header,
+      body.mobile-mode .expense-bar-meta {
+        min-width: 0;
+      }
+      body.mobile-mode .expense-distribution-kpi,
+      body.mobile-mode .expense-bar-amount {
+        min-width: 0;
+        max-width: 48%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      body.mobile-mode .expense-bar-category {
+        max-width: 48%;
+      }
+
+      /* Transacciones: los controles pasan a filas limpias. */
+      body.mobile-mode .tx-head-bar-169 {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 7px;
+      }
+      body.mobile-mode .tx-head-left,
+      body.mobile-mode .tx-head-right {
+        width: 100%;
+        min-width: 0;
+      }
+      body.mobile-mode .tx-head-right {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+      }
+      body.mobile-mode .tx-search-input,
+      body.mobile-mode .tx-search-input:focus {
+        width: 100%;
+        min-width: 0;
+      }
+      body.mobile-mode .tx-filter-indicator {
+        min-width: 0;
+        max-width: 100%;
+        flex-wrap: wrap;
+      }
+      body.mobile-mode .tx-scroll-169 {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      /* Predictiva: cada control ocupa su propia fila cuando el ancho es reducido. */
+      body.mobile-mode .fp-top-bar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+      }
+      body.mobile-mode .fp-top-bar > div:first-child {
+        width: 100% !important;
+      }
+      body.mobile-mode .fp-worker-tabs {
+        width: 100% !important;
+        max-width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      body.mobile-mode .fp-tab-btn {
+        min-width: 0;
+        width: 100%;
+        padding: 8px 6px;
+        line-height: 1.2;
+        white-space: normal;
+      }
+      body.mobile-mode #forecastTrendBadge {
+        width: 100% !important;
+        text-align: left;
+      }
+      body.mobile-mode .forecast-kpis-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        width: 100%;
+      }
+      body.mobile-mode .forecast-main-grid .chart-card-169 {
+        min-height: 300px;
+      }
+
+      /* Drawer de filtros: una columna evita controles partidos o cortados. */
+      body.mobile-mode .filter-drawer {
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        padding: 10px;
+        overflow-x: hidden;
+      }
+      body.mobile-mode .filter-drawer-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 9px;
+      }
+      body.mobile-mode .filter-item,
+      body.mobile-mode .filter-item select,
+      body.mobile-mode .filter-item input[type="date"] {
+        width: 100%;
+        min-width: 0;
+      }
+      body.mobile-mode .filter-drawer-actions {
+        width: 100%;
+        margin-left: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      body.mobile-mode .filter-drawer-actions button {
+        width: 100%;
+        min-height: 40px;
+      }
+    }
+
+    @media (max-width: 390px) {
+      body.mobile-mode .canvas-body { padding: 8px; }
+      body.mobile-mode .top-header { min-height: 96px; }
+      body.mobile-mode .kpi-row-169 { gap: 7px; }
+      body.mobile-mode .kpi-card-169 { padding: 9px; }
+      body.mobile-mode .kpi-value-169 { font-size: 16px; }
+      body.mobile-mode .chart-card-169,
+      body.mobile-mode .dual-chart-card-169,
+      body.mobile-mode .tx-card-169 { padding: 9px; }
+      body.mobile-mode .fp-worker-tabs { grid-template-columns: 1fr; }
+      body.mobile-mode .tx-head-right { grid-template-columns: 1fr; }
+    }
+
     @media (min-width: 601px) {
       .mobile-mode-banner { display: none !important; }
       .mobile-mode-trigger { display: none !important; }
@@ -5303,7 +5614,7 @@
             <td>${r.categoria}</td>
             <td class="tx-right"><span class="tx-amount-169 ${cls}">${fmtCurrency(r.valorNum)}</span></td>
             <td>${r.medio}</td>
-            <td>${r.comentario || '?'}</td>
+            <td>${r.comentario || '—'}</td>
           </tr>`;
         });
         tbody.innerHTML = buf.join('');
@@ -5680,7 +5991,7 @@
         a.href = url; a.download = csvName;
         document.body.appendChild(a); a.click();
         document.body.removeChild(a); URL.revokeObjectURL(url);
-        showToast(`? ${rows.length} filas exportadas`, 'success');
+        showToast(`✓ ${rows.length} filas exportadas`, 'success');
       }
 
       // -----------------------------------------------------------
@@ -5748,7 +6059,7 @@
         if (si) si.value = '';
         updateCategorySelect();
         applyMesActual();
-        showToast('? Filtros limpiados', 'info', 1800);
+        showToast('✓ Filtros limpiados', 'info', 1800);
       }
 
       function clearChartTableFilter(showFeedback = true) {
@@ -5784,7 +6095,7 @@
         document.getElementById('txSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
         setTimeout(flashFilteredRows, 180);
 
-        const tipoLabel = nextFilter.tipo ? ` ? ${nextFilter.tipo}` : '';
+        const tipoLabel = nextFilter.tipo ? ` · ${nextFilter.tipo}` : '';
         showToast(`Tabla filtrada: ${value}${tipoLabel}`, 'info', 2200);
       }
 
@@ -7051,7 +7362,7 @@ function openDemoTransactionNotice(){showToast('Portfolio Demo: los datos son fi
   const phone=()=>window.matchMedia('(max-width:'+BP+'px)').matches;
   function setMode(on,persist){document.body.classList.toggle('mobile-mode',!!on);const t=document.getElementById('btnMobileMode'),b=document.getElementById('mobileModeBanner'),e=document.getElementById('btnEnableMobileMode');if(t){t.classList.toggle('active',!!on);t.setAttribute('aria-pressed',String(!!on));const l=t.querySelector('.mobile-mode-trigger-label');if(l)l.textContent=on?'Vista normal':'Modo móvil';}if(b)b.classList.toggle('is-visible',phone()&&!on&&!sessionStorage.getItem(DISMISS));if(e)e.textContent=on?'Activado':'Activar';if(persist)localStorage.setItem(KEY,on?'on':'off');requestAnimationFrame(()=>requestAnimationFrame(()=>{try{Object.values(charts||{}).filter(Boolean).forEach(c=>c.resize&&c.resize())}catch(e){}}));}
   function refresh(){const b=document.getElementById('mobileModeBanner');if(b)b.classList.toggle('is-visible',phone()&&!document.body.classList.contains('mobile-mode')&&!sessionStorage.getItem(DISMISS));}
-  function init(){const t=document.getElementById('btnMobileMode'),e=document.getElementById('btnEnableMobileMode'),d=document.getElementById('btnDismissMobileMode');setMode(localStorage.getItem(KEY)==='on',false);if(t)t.addEventListener('click',()=>{setMode(!document.body.classList.contains('mobile-mode'),true);sessionStorage.removeItem(DISMISS)});if(e)e.addEventListener('click',()=>{setMode(true,true);sessionStorage.removeItem(DISMISS)});if(d)d.addEventListener('click',()=>{sessionStorage.setItem(DISMISS,'1');refresh()});window.addEventListener('resize',refresh,{passive:true});window.addEventListener('orientationchange',()=>setTimeout(()=>{refresh();try{Object.values(charts||{}).filter(Boolean).forEach(c=>c.resize&&c.resize())}catch(e){}},250),{passive:true});}
+  function init(){const t=document.getElementById('btnMobileMode'),e=document.getElementById('btnEnableMobileMode'),d=document.getElementById('btnDismissMobileMode');setMode(localStorage.getItem(KEY)==='on',false);if(t)t.addEventListener('click',()=>{setMode(!document.body.classList.contains('mobile-mode'),true);sessionStorage.removeItem(DISMISS)});if(e)e.addEventListener('click',()=>{setMode(true,true);sessionStorage.removeItem(DISMISS)});if(d)d.addEventListener('click',()=>{sessionStorage.setItem(DISMISS,'1');refresh()});window.addEventListener('resize',refresh,{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',refresh,{passive:true});window.addEventListener('orientationchange',()=>setTimeout(()=>{refresh();try{Object.values(charts||{}).filter(Boolean).forEach(c=>c.resize&&c.resize())}catch(e){}},250),{passive:true});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 
