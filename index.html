@@ -682,9 +682,15 @@
       display: grid;
       grid-template-columns: 1.72fr 1fr 1fr;
       gap: 10px;
-      height: auto;
+      height: 100%;
       min-height: 0;
-      flex: 1;
+      flex: 1 1 0;
+      overflow: hidden;
+    }
+    .charts-grid-middle > .chart-card-169 {
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
     }
 
     .chart-card-169 {
@@ -791,7 +797,18 @@
     }
     .chart-canvas-wrapper {
       width: 100%;
-      height: 100%;
+      height: 245px;
+      max-height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+    .chart-canvas-wrapper .apexcharts-canvas,
+    .chart-canvas-wrapper .apexcharts-svg {
+      max-width: 100% !important;
+    }
+    .chart-body-169 {
+      overflow: hidden;
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -2146,6 +2163,11 @@
         min-width: 0 !important;
       }
       body.mobile-mode .chart-canvas-wrapper {
+        overflow: hidden;
+        height: 270px;
+        max-height: 270px;
+      }
+      body.mobile-mode .chart-body-169 {
         overflow: hidden;
       }
 
@@ -5039,27 +5061,18 @@
       let responsiveChartResizeTimer = null;
 
       function getResponsiveChartHeights() {
-        // Los gráficos no deben usar una altura fija: a 100% de zoom el
-        // viewport puede ser menor y ApexCharts termina dibujando más alto
-        // que su contenedor, ocultando la parte inferior del eje Y.
-        // Medimos el espacio real disponible después de que el grid haya
-        // calculado sus dimensiones.
+        // Alturas deliberadamente acotadas para que ApexCharts nunca haga crecer
+        // el grid padre de forma recursiva. El layout 16:9 controla el espacio;
+        // el gráfico se adapta DENTRO de su tarjeta, no al revés.
         const mobile = document.body.classList.contains('mobile-mode');
-        const measure = (id, fallback) => {
-          const el = document.getElementById(id);
-          const available = el ? Math.floor(el.getBoundingClientRect().height) : 0;
-          const min = mobile ? 190 : 180;
-          const max = mobile ? 520 : 360;
-          return Math.max(min, Math.min(max, available || fallback));
-        };
         return {
-          evolucion: measure('chartEvolucionCanvas', mobile ? 300 : 260),
-          distribucion: measure('chartDistribucionCanvas', mobile ? 300 : 260),
-          medioPago: measure('chartMedioPagoCanvas', mobile ? 300 : 260),
-          cierreCaja: measure('chartCierreCajaCanvas', mobile ? 300 : 260),
-          ingVsEgr: measure('chartIngVsEgrMesCanvas', mobile ? 300 : 260),
-          forecastTrend: measure('chartForecastTrend', mobile ? 340 : 280),
-          depSalary: measure('chartDepSalary', mobile ? 280 : 240)
+          evolucion: mobile ? 270 : 245,
+          distribucion: mobile ? 270 : 245,
+          medioPago: mobile ? 270 : 245,
+          cierreCaja: mobile ? 270 : 245,
+          ingVsEgr: mobile ? 270 : 245,
+          forecastTrend: mobile ? 300 : 255,
+          depSalary: mobile ? 270 : 240
         };
       }
 
@@ -5074,30 +5087,23 @@
           ['forecastTrend', h.forecastTrend],
           ['depSalary', h.depSalary]
         ];
-
         chartKeys.forEach(function(pair) {
-          const key = pair[0];
-          const height = pair[1];
-          if (charts[key]) {
-            charts[key].updateOptions({ chart: { height: height } }, false, false);
-          }
+          const chart = charts[pair[0]];
+          if (chart) chart.updateOptions({ chart: { height: pair[1] } }, false, false);
         });
       }
 
       function scheduleResponsiveChartHeights() {
-        if (responsiveChartResizeTimer) {
-          clearTimeout(responsiveChartResizeTimer);
-        }
+        if (responsiveChartResizeTimer) clearTimeout(responsiveChartResizeTimer);
         responsiveChartResizeTimer = setTimeout(function() {
           applyResponsiveChartHeights();
           requestAnimationFrame(function() {
-            applyResponsiveChartHeights();
             Object.values(charts || {}).filter(Boolean).forEach(function(chart) {
               if (chart && typeof chart.resize === 'function') chart.resize();
             });
           });
           responsiveChartResizeTimer = null;
-        }, 180);
+        }, 120);
       }
 
       function initCharts() {
