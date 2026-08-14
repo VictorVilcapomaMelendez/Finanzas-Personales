@@ -1,7 +1,7 @@
 <!--
   @file index.html
-  @description Frontend del Dashboard Financiero Personal - Layout Analítico 16:9 Profesional (Power BI Concept)
-              Ejecutable localmente con datos ficticios.
+  @description Portfolio público del Dashboard Financiero Personal - Layout Analítico 16:9 Profesional.
+              Ejecutable localmente con datos ficticios. Sin APIs, claves, tokens ni endpoints privados.
 -->
 <!DOCTYPE html>
 <html lang="es">
@@ -219,6 +219,7 @@
     }
 
     /* Sidebar quick action cards */
+    .sidebar-widget { display:none !important; }
     .sidebar-widget {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.07);
@@ -1992,7 +1993,7 @@
    .portfolio-demo-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--border-color);border-radius:999px;background:var(--surface-card);color:var(--text-primary);font-size:10px;font-weight:800;box-shadow:0 1px 4px rgba(15,23,42,.05)}[data-theme="dark"] .portfolio-demo-badge{background:rgba(15,23,42,.75);border-color:rgba(56,189,248,.16);color:#E2E8F0}
   </style>
  </head>
- <body>
+ <body data-local-only="true">
   <!-- ══════════════════════════════════════════════════════════
        [MODO MÓVIL EXPLÍCITO]
        Aviso inicial + control persistente para cambiar de modo.
@@ -2111,19 +2112,6 @@
        </button>
       </li>
      </ul>
-     <div class="sidebar-widget" id="sidebarBudgetWidget" title="Ver presupuesto mensual">
-      <div class="sidebar-widget-head">
-       <span>
-        🎯 Presupuesto
-       </span>
-       <span id="sidebarBudgetPct" style="color:#10B981;font-weight:800">
-        OK
-       </span>
-      </div>
-      <div class="sidebar-widget-sub" id="sidebarBudgetSub">
-       Clic para ver desglose
-      </div>
-     </div>
     </div>
     <div class="sidebar-bottom">
      <div class="sidebar-currency-selector">
@@ -2989,7 +2977,7 @@
     </div>
     <!-- /forecastView -->
     <!-- Hidden elements required by existing JS logic -->
-    <div id="metaPanel" style="display:none">
+    <div id="legacyMetaPanel" style="display:none">
     </div>
     <div id="metaNoMetaMsg" style="display:none">
     </div>
@@ -3016,7 +3004,7 @@
     </div>
    </main>
    <div aria-hidden="true" id="portfolioCompat" style="display:none !important;">
-    <section id="metaPanel">
+    <section id="legacyMetaPanel">
     </section>
     <div id="metaGaugeSection">
     </div>
@@ -3553,7 +3541,7 @@
               actualBalanceYtd: round2(actualBalanceYtd),
               monthsObserved: monthIndex,
               historicalMonthsUsed: modelingHistory.length,
-              methodology: "La proyección combina tendencia reciente y estacionalidad mensual cuando hay suficiente base hist?rica."
+              methodology: "La proyección combina tendencia reciente y estacionalidad mensual cuando hay suficiente base histórica."
             });
           }
 
@@ -3643,7 +3631,7 @@
           averageMonthlyBalance: round2(avgBalance),
           savingsRate: avgIngreso > 0 ? round2((avgBalance / avgIngreso) * 100) : 0,
           historicalMonthsUsed: modelingHistory.length,
-          methodology: "Pron?stico h?brido: tendencia reciente (m?nimos cuadrados) + estacionalidad por mes (promedio ponderado de todos los mismos meses disponibles, hasta 4 años). Mayor histórico disponible = mayor precisi?n estacional.",
+          methodology: "Pronóstico híbrido: tendencia reciente (mínimos cuadrados) + estacionalidad por mes (promedio ponderado de todos los mismos meses disponibles, hasta 4 años). Mayor histórico disponible = mayor precisión estacional.",
           trend: {
             ingresosSlope: round2(trendIngreso),
             egresosSlope: round2(trendEgreso),
@@ -3965,7 +3953,7 @@
           data: entPairs.map(([_, sum]) => sum)
         };
 
-        // rawRows ? Ingresos/Egresos del per?odo+moneda sin filtro tipo/categoría
+        // rawRows ? Ingresos/Egresos del período+moneda sin filtro tipo/categoría
         const _meses = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
         const rawRows = [];
         for (let i = 0; i < VALUES_DB.length; i++) {
@@ -4213,7 +4201,7 @@
         requestAnimationFrame(step);
       }
 
-      // -- PER?ODO BADGE --
+      // -- PERÍODO BADGE --
       function updatePeriodBadge() {
         const fIn  = document.getElementById('fInicio').value;
         const fFi  = document.getElementById('fFin').value;
@@ -4321,7 +4309,7 @@
 
       function trendLabel(direction) {
         if (direction === 'up') return 'mejora';
-        if (direction === 'down') return 'presi?n';
+        if (direction === 'down') return 'presión';
         return 'estable';
       }
 
@@ -4467,7 +4455,7 @@
               if (charts.depSalary) charts.depSalary.resize();
               if (currentForecast) {
                 renderForecastChart(currentForecast);
-                updateForecastGoalSummary();
+                if (typeof updateForecastGoalSummary === 'function') updateForecastGoalSummary();
               }
             } else {
               [charts.evolucion, charts.distribucion, charts.medioPago, charts.cierreCaja, charts.ingVsEgr]
@@ -4787,7 +4775,7 @@
           yaxis: { 
             labels: { 
               formatter: (val) => val.toLocaleString('es-PE', { notation: "compact", maximumFractionDigits: 0 }),
-              style: { fontSize: '10px' } // Más peque?o para móviles
+              style: { fontSize: '10px' } // Más pequeño para móviles
             } 
           },
           tooltip: {
@@ -4809,7 +4797,7 @@
                 fechaKey  = `${yy}-${mm}-${dd}`;
                 const raw = new Date(ts).toLocaleDateString('es-PE', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
                 fechaExacta = raw.charAt(0).toUpperCase() + raw.slice(1);
-                // Top 3 de ese d?a exacto, agrupado por categoría
+                // Top 3 de ese día exacto, agrupado por categoría
                 const egrMap = {};
                 const ingMap = {};
                 (allTransactions || []).forEach(r => {
@@ -4847,8 +4835,8 @@
                   <span style="display:flex;align-items:center;gap:6px;color:${text};"><span style="width:9px;height:9px;border-radius:50%;background:#C62828;flex-shrink:0;"></span>Egresos</span>
                   <span style="font-weight:700;color:#C62828;">${fmtCurrency(egr)}</span>
                 </div>
-                ${topEgr.length ? `<div style="border-top:1px solid ${divider};">${sectionLabel('Egresos del d?a')}${buildTop3(topEgr,'#C62828')}</div>` : ''}
-                ${topIng.length ? `<div style="border-top:1px solid ${divider};">${sectionLabel('Ingresos del d?a')}${buildTop3(topIng,'#2E7D32')}</div>` : ''}
+                ${topEgr.length ? `<div style="border-top:1px solid ${divider};">${sectionLabel('Egresos del día')}${buildTop3(topEgr,'#C62828')}</div>` : ''}
+                ${topIng.length ? `<div style="border-top:1px solid ${divider};">${sectionLabel('Ingresos del día')}${buildTop3(topIng,'#2E7D32')}</div>` : ''}
               </div>`;
             }
           },
@@ -4987,230 +4975,11 @@
         if (el) el.querySelector('[data-field="value"]').textContent = fmtCurrency(val);
       }
 
-      function updateBudgetPanel(moneda, startISO, endISO) {
-  const meta = localGetPresupuestoActual(moneda, startISO, endISO);
-  applyBudgetMeta(meta);
-}
+      // Módulo de presupuesto heredado: deliberadamente desactivado en el portfolio público.
+      // No consulta fuentes externas ni modifica la interfaz final.
+      function updateBudgetPanel() { return; }
 
-
-      function applyBudgetMeta(meta) {
-        const startISO = document.getElementById('fInicio').value;
-        const panel         = document.getElementById('metaPanel');
-        const noMetaMsg     = document.getElementById('metaNoMetaMsg');
-        const gaugeSection  = document.getElementById('metaGaugeSection');
-        const alertsContent = document.getElementById('alertsContent');
-        const posMsg        = document.getElementById('metaPosMsg');
-        const dismissBtn    = document.getElementById('metaDismissBtn');
-
-            if (!meta) {
-              panel.classList.add('active', 'no-meta');
-              panel.classList.remove('warning', 'danger', 'success');
-              noMetaMsg.innerHTML = '<span style="font-size:14px">📋 <strong>Sin presupuesto configurado</strong> • Agrega una fila tipo <em>Presupuesto</em> en tu hoja para este período.</span>';
-              noMetaMsg.style.display    = 'block';
-              gaugeSection.style.display = 'none';
-              if (alertsContent) alertsContent.style.display = 'none';
-              if (posMsg) posMsg.style.display = 'none';
-              if (dismissBtn) dismissBtn.style.display = 'none';
-              const metaTitleSpan = document.getElementById('metaTitleText');
-              if (metaTitleSpan) metaTitleSpan.textContent = 'Presupuesto del Periodo';
-              const _subEl = document.getElementById('metaSubtitle');
-              if (_subEl && startISO) {
-                const _d = new Date(startISO + 'T12:00:00');
-                const _MN = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-                _subEl.textContent = _MN[_d.getMonth()] + ' ' + _d.getFullYear();
-              }
-              const metaBadge = document.getElementById('metaBadge');
-              metaBadge.textContent = 'Sin Presupuesto';
-              metaBadge.className = 'meta-badge no-meta';
-              document.getElementById('metaIcon').textContent = '📋';
-              return;
-            }
-
-            // Comprobar si el usuario cerr? las alertas este mes
-            // NOTA: solo suprime la secci?n de alertas, nunca el panel completo.
-            const dStart = new Date(startISO + 'T12:00:00');
-            const dismissKey = 'BUDGET_DISMISSED_' + dStart.getFullYear() + '_' + String(dStart.getMonth() + 1).padStart(2, '0');
-            const alertsDismissed = meta.esMesActual && localStorage.getItem(dismissKey) === '1';
-
-            // Hay presupuesto ? mostrar panel siempre
-            noMetaMsg.style.display    = 'none';
-            gaugeSection.style.display = 'block';
-            panel.classList.add('active');
-            panel.classList.remove('no-meta', 'warning', 'danger', 'success');
-            if (dismissBtn) dismissBtn.style.display = !alertsDismissed ? '' : 'none';
-
-            const metaTitleSpan = document.getElementById('metaTitleText');
-            if (metaTitleSpan) metaTitleSpan.textContent = meta.esMesActual ? 'Presupuesto del Mes' : 'Presupuesto del Periodo';
-            const _subEl2 = document.getElementById('metaSubtitle');
-            if (_subEl2 && startISO) {
-              const _d2 = new Date(startISO + 'T12:00:00');
-              const _MN2 = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-              _subEl2.textContent = _MN2[_d2.getMonth()] + ' ' + _d2.getFullYear();
-            }
-
-            const metaIcon  = document.getElementById('metaIcon');
-            const metaBadge = document.getElementById('metaBadge');
-            const pctVisual = meta.porcentajeUsado;
-            if (pctVisual >= 100) {
-              panel.classList.add('danger');
-              metaIcon.textContent = '🔴';
-              metaBadge.textContent = 'Presupuesto Sobrepasado';
-              metaBadge.className = 'meta-badge danger';
-            } else if (pctVisual >= 70) {
-              panel.classList.add('warning');
-              metaIcon.textContent = '🟠';
-              metaBadge.textContent = 'Cerca de Presupuesto';
-              metaBadge.className = 'meta-badge warning';
-            } else {
-              panel.classList.add('success');
-              metaIcon.textContent = '🟢';
-              metaBadge.textContent = 'Dentro de Presupuesto';
-              metaBadge.className = 'meta-badge success';
-            }
-
-            // Gauge
-            const porcentaje = Math.min(meta.porcentajeUsado, 100);
-            const gaugeFill  = document.getElementById('gaugeFill');
-            gaugeFill.style.width = porcentaje + '%';
-
-            const pctLabel = document.getElementById('gaugePctLabel');
-            if (pctLabel) {
-              const pctReal  = meta.porcentajeUsado;
-              const chipState = pctReal >= 100 ? 'danger' : pctReal >= 70 ? 'warning' : '';
-              const emoji    = chipState === 'danger' ? '🔴' : chipState === 'warning' ? '🟠' : '🟢';
-              const sub      = chipState === 'danger' ? 'superado' : 'del presupuesto';
-              pctLabel.innerHTML = `<span class="gauge-pct-emoji">${emoji}</span><span class="gauge-pct-number">${pctReal.toFixed(1)}%</span><span class="gauge-pct-sub">${sub}</span>`;
-              pctLabel.className = 'gauge-pct-chip' + (chipState ? ' ' + chipState : '');
-            }
-
-            const gaugeBar = document.getElementById('gaugeBar');
-            if (gaugeBar) gaugeBar.setAttribute('aria-valuenow', Math.round(Math.min(meta.porcentajeUsado, 100)));
-
-            const paceMarker = document.getElementById('gaugePaceMarker');
-            if (paceMarker && meta.diasMes > 0 && meta.esMesActual) {
-              const paceLeft = Math.min((meta.diasTranscurridos / meta.diasMes) * 100, 100);
-              const paceIdealMonto = (meta.diasTranscurridos / meta.diasMes) * meta.meta;
-              paceMarker.style.left    = paceLeft + '%';
-              paceMarker.setAttribute('data-label', 'Ritmo ideal: ' + fmtCurrency(paceIdealMonto));
-              paceMarker.style.display = '';
-            } else if (paceMarker) {
-              paceMarker.style.display = 'none';
-            }
-
-            // Color de la barra seg?n porcentaje real
-            gaugeFill.classList.toggle('at-70',  pctVisual >= 70 && pctVisual < 100);
-            gaugeFill.classList.toggle('warning', pctVisual >= 70 && pctVisual < 100);
-            gaugeFill.classList.toggle('danger',  pctVisual >= 100);
-
-            // Stats: Presupuesto
-            document.getElementById('metaValor').textContent = fmtCurrency(meta.meta);
-
-            // Stats: Gastado con % inline
-            const pctStr    = meta.meta > 0 ? ' (' + meta.porcentajeUsado.toFixed(1) + '%)' : '';
-            const gastadoEl = document.getElementById('metaGastado');
-            gastadoEl.textContent  = fmtCurrency(meta.gastado) + pctStr;
-            gastadoEl.style.color  = pctVisual >= 100 ? COLORS.egreso : pctVisual >= 70 ? '#E65100' : COLORS.ingreso;
-
-            // Stats: Disponible / Exceso
-            const disponibleEl = document.getElementById('metaDisponible');
-            const disponibleLabel = disponibleEl.closest('.meta-stat').querySelector('.meta-stat-label');
-            if (pctVisual >= 100) {
-              const exceso = meta.gastado - meta.meta;
-              disponibleEl.innerHTML = '<span style="color:var(--red);font-weight:800">-' + fmtCurrency(exceso) + '</span>';
-              disponibleLabel.textContent = 'Exceso';
-            } else if (pctVisual >= 70) {
-              disponibleEl.style.color = '#E65100';
-              disponibleEl.textContent = fmtCurrency(meta.restante);
-              disponibleLabel.textContent = 'Disponible';
-            } else {
-              disponibleEl.style.color = COLORS.ingreso;
-              disponibleEl.textContent = fmtCurrency(meta.restante);
-              disponibleLabel.textContent = 'Disponible';
-            }
-
-            // Stats: Días
-            const diasEl    = document.getElementById('metaDias');
-            const diasLabel = diasEl.closest('.meta-stat').querySelector('.meta-stat-label');
-            if (meta.esMesActual) {
-              diasLabel.textContent = 'Días restantes';
-              diasEl.textContent    = meta.diasRestantes;
-            } else {
-              diasLabel.textContent = 'Días del mes';
-              diasEl.textContent    = meta.diasMes || meta.diasTranscurridos;
-            }
-
-            const promedioEl = document.getElementById('metaPromedio');
-            promedioEl.textContent = fmtCurrency(meta.promedioGastoDiario);
-            promedioEl.style.color = pctVisual >= 100 ? COLORS.egreso : pctVisual >= 70 ? '#E65100' : COLORS.ingreso;
-
-            // Stats: Proyección / Resultado con badge contextual
-            const proyEl    = document.getElementById('metaProyeccion');
-            const proyLabel = proyEl.closest('.meta-stat').querySelector('.meta-stat-label');
-            if (meta.esMesActual) {
-              proyLabel.textContent = 'Proyección';
-              const diff     = meta.proyeccionFinMes - meta.meta;
-              const badgeCls = diff > 0 ? 'over' : 'under';
-              const diffSign = diff > 0 ? '+' : '-';
-              const proyColor = diff > 0 ? COLORS.egreso : COLORS.ingreso;
-              proyEl.innerHTML = '<span style="color:' + proyColor + ';font-weight:900">' + fmtCurrency(meta.proyeccionFinMes) + '</span>' +
-                '<br><span class="proj-badge ' + badgeCls + '">' + diffSign + fmtCurrency(Math.abs(diff)) + ' vs presupuesto</span>';
-            } else {
-              proyLabel.textContent = 'Resultado';
-              const diff     = meta.gastado - meta.meta;
-              const badgeCls = diff > 0 ? 'over' : 'under';
-              const diffSign = diff > 0 ? '+' : '-';
-              const proyColor = diff > 0 ? COLORS.egreso : COLORS.ingreso;
-              proyEl.innerHTML = '<span style="color:' + proyColor + ';font-weight:900">' + fmtCurrency(meta.gastado) + '</span>' +
-                '<br><span class="proj-badge ' + badgeCls + '">' + diffSign + fmtCurrency(Math.abs(diff)) + ' vs presupuesto</span>';
-            }
-
-            // Stats: Ritmo ideal vs actual
-            const ritmoEl   = document.getElementById('metaRitmo');
-            const ritmoStat = document.getElementById('metaRitmoStat');
-            if (ritmoEl && meta.ritmoIdeal !== undefined && meta.diasTranscurridos > 0) {
-              const diff     = meta.gastado - meta.ritmoIdeal;
-              const badgeCls = diff > 0 ? 'over' : 'under';
-              const diffSign = diff > 0 ? '+' : '-';
-              ritmoEl.innerHTML = fmtCurrency(meta.gastado) + ' vs ' + fmtCurrency(meta.ritmoIdeal) +
-                ' <span class="proj-badge ' + badgeCls + '">' + diffSign + fmtCurrency(Math.abs(diff)) + '</span>';
-              if (ritmoStat) ritmoStat.style.display = '';
-            } else if (ritmoStat) {
-              ritmoStat.style.display = 'none';
-            }
-
-            // Ocultar alertsContent siempre (la info está en el gauge y posMsg)
-            const _ac = document.getElementById('alertsContent');
-            if (_ac) { _ac.style.display = 'none'; _ac.innerHTML = ''; }
-
-            // Insight compacto: una sola línea accionable
-            if (posMsg) {
-              const pctVal = meta.porcentajeUsado;
-              let msg = '';
-              if (meta.esMesActual) {
-                if (pctVal >= 100) {
-                  const exceso = meta.gastado - meta.meta;
-                  msg = 'Excediste el presupuesto por <strong>' + fmtCurrency(exceso) + '</strong>';
-                } else if (pctVal >= 70) {
-                  msg = 'Quedan <strong>' + fmtCurrency(meta.restante) + '</strong> para los ' + (meta.diasRestantes || 0) + ' días restantes';
-                } else {
-                  msg = 'Puedes gastar <strong>' + fmtCurrency(meta.restante) + '</strong> más este mes';
-                }
-              } else {
-                if (pctVal >= 100) {
-                  const exceso = meta.gastado - meta.meta;
-                  msg = 'Mes cerrado con exceso de <strong>' + fmtCurrency(exceso) + '</strong>';
-                } else {
-                  msg = 'Mes cerrado • sobraron <strong>' + fmtCurrency(meta.restante) + '</strong> del presupuesto';
-                }
-              }
-              if (alertsDismissed) {
-                posMsg.style.display = 'none';
-              } else {
-                posMsg.innerHTML = msg;
-                posMsg.style.display = 'flex';
-              }
-            }
-      }  // end applyBudgetMeta
+      function applyBudgetMeta() { return; }
 
       function updateAlertsPanel(meta) {
         const content = document.getElementById('alertsContent');
@@ -5245,67 +5014,9 @@
        * Called from renderData with data.presupuestoHistorial.
        * Shows when there are 2+ months with configured budgets.
        */
-      function renderBudgetHistory(historial) {
-        var section  = document.getElementById('metaBudgetHistorySection');
-        var grid     = document.getElementById('metaBudgetHistoryGrid');
-        var summaryEl = document.getElementById('metaBudgetHistorySummary');
-        if (!section || !grid) return;
-
-        if (!historial || historial.length < 1) {
-          section.style.display = 'none';
-          return;
-        }
-
-        var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-        var MESES_CORTO = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-
-        var totalBudget = 0, totalGasto = 0;
-        grid.innerHTML = historial.map(function(m) {
-          totalBudget += m.presupuesto;
-          totalGasto  += m.gastado;
-          var pct      = m.porcentajeUsado;
-          var fillPct  = Math.min(pct, 100);
-          var fillColor = m.estado === 'sobrepasado' ? '#EF4444' : m.estado === 'cerca' ? '#F59E0B' : '#10B981';
-          var pctColor  = m.estado === 'sobrepasado' ? '#B91C1C' : m.estado === 'cerca' ? '#D97706' : '#059669';
-          var estadoEmoji = m.estado === 'sobrepasado' ? '🔴' : m.estado === 'cerca' ? '🟠' : '🟢';
-          var pctStr    = pct.toFixed(1) + '%';
-          var monthLabel = MESES_CORTO[m.mes] + ' ' + m.anio;
-          var excOk = m.estado === 'sobrepasado'
-            ? '<span style="color:#B91C1C">Exceso: <strong>' + fmtCurrency(m.gastado - m.presupuesto) + '</strong></span>'
-            : '<span style="color:#059669">Sobrante: <strong>' + fmtCurrency(m.restante) + '</strong></span>';
-          var proyLabel = m.esMesActual && m.proyeccionFinMes > 0
-            ? '<span>Proyección: <strong>' + fmtCurrency(m.proyeccionFinMes) + '</strong></span>'
-            : '';
-          return '<div class="meta-history-item ' + m.estado + (m.esMesActual ? ' current' : '') + '">' +
-            '<div class="meta-history-header">' +
-              '<span class="meta-history-month">' + estadoEmoji + ' ' + monthLabel + (m.esMesActual ? ' •' : '') + '</span>' +
-              '<span class="meta-history-pct" style="color:' + pctColor + '">' + pctStr + '</span>' +
-            '</div>' +
-            '<div class="meta-history-bar-track">' +
-              '<div class="meta-history-bar-fill" style="width:' + fillPct + '%;background:' + fillColor + '"></div>' +
-            '</div>' +
-            '<div class="meta-history-amounts">' +
-              '<span>Gasto: <strong>' + fmtCurrency(m.gastado) + '</strong></span>' +
-              '<span>Meta: ' + fmtCurrency(m.presupuesto) + '</span>' +
-              excOk +
-              proyLabel +
-            '</div>' +
-          '</div>';
-        }).join('');
-
-        // Resumen total del per?odo
-        if (summaryEl) {
-          var totalPct   = totalBudget > 0 ? (totalGasto / totalBudget * 100) : 0;
-          var totalColor = totalGasto > totalBudget ? '#B91C1C' : '#059669';
-          var totalEmoji = totalGasto > totalBudget ? '🔴' : totalPct >= 70 ? '🟠' : '🟢';
-          summaryEl.innerHTML =
-            '<span>' + totalEmoji + ' Total del período</span>' +
-            '<span>Gastado: <strong style="color:' + totalColor + '">' + fmtCurrency(totalGasto) + '</strong> / <strong>' + fmtCurrency(totalBudget) + '</strong> (' + totalPct.toFixed(1) + '%)</span>';
-          summaryEl.style.display = '';
-        }
-
-        section.style.display = '';
-      }
+      // El historial de presupuesto pertenece al dashboard privado y no forma parte
+      // de la composición final del Portfolio Demo.
+      function renderBudgetHistory() { return; }
 
       function applyFilters() {
   const dates = getISOParams();
@@ -5362,6 +5073,7 @@
           const el = document.getElementById(id);
           if (!el) return;
           const vEl = el.querySelector('[data-field="value"]');
+          if (!vEl) return;
           vEl.innerHTML = '';
           animateCounter(vEl, val, true);
         };
@@ -5400,7 +5112,7 @@
           animateCounter(topCatVal, data.kpis.topCategoria.monto, true);
           topCatLabel.textContent = data.kpis.topCategoria.nombre;
         } else {
-          topCatVal.textContent = '?';
+          topCatVal.textContent = '—';
           topCatLabel.textContent = 'Sin datos';
         }
 
@@ -5466,21 +5178,26 @@
         allTransactions  = data.rawRows || [];
         ytdKpisData      = data.ytdKpis  || null;
         ytdKpisFetched   = false;
-        applyBudgetMeta(data.presupuesto || null);
-        renderBudgetHistory(data.presupuestoHistorial || []);
-        renderForecastPanel(data.forecast || null);
+        // El portfolio público usa exclusivamente datos locales.
+        // No renderizar los módulos de presupuesto heredados del dashboard privado.
+        // La vista predictiva usa directamente el modelo forecast local.
+        currentForecast = data.forecast || null;
+        renderForecastChart(currentForecast);
+        if (typeof updateForecastGoalSummary === 'function') {
+          updateForecastGoalSummary();
+        }
         renderTransactions();
         // Refrescar contador de ahorro del panel dep (los datos llegaron)
         if (depWorkerProfile) updateDepGoal(depWorkerProfile);
 
-        showToast('? Datos actualizados', 'success');
+        showToast('✓ Datos actualizados', 'success');
       }
 
       // --------------------------------------------------------
       // [TX_TABLE] Tabla de transacciones + Tooltip flotante
       // --------------------------------------------------------
 
-      /** Devuelve filas de allTransactions aplicando los dropdowns activos + b?squeda de texto */
+      /** Devuelve filas de allTransactions aplicando los dropdowns activos + búsqueda de texto */
       function getFilteredRows() {
         const tipo  = document.getElementById('filtroTipo').value;
         const cat   = document.getElementById('filtroCategoria').value;
@@ -5594,7 +5311,7 @@
 
       // ??? TOOLTIP FLOTANTE ???
       const _ttEl   = () => document.getElementById('txTooltip');
-      let   _ttHide = null; // timer para ocultar con peque?o delay
+      let   _ttHide = null; // timer para ocultar con pequeño delay
 
       /**
        * Muestra el tooltip con transacciones que coinciden con el campo/valor hovereado.
@@ -5621,7 +5338,7 @@
         const total = rows.reduce((s, r) => s + r.valorNum, 0);
         const tipo1 = rows[0].tipo;
         const cls   = tipo1 === 'Ingreso' ? 'ingreso' : 'egreso';
-        // Calcula cu?ntos items caben sin scroll seg?n el viewport disponible
+        // Calcula cuántos items caben sin scroll según el viewport disponible
         const MAX   = 6;
         const sorted = [...rows].sort((a, b) => b.valorNum - a.valorNum);
         const shown  = sorted.slice(0, MAX);
@@ -5768,9 +5485,9 @@
       /**
        * Adjunta eventos mousemove/mouseleave a los wrappers de cada gráfico
        * usando la API de eventos de ApexCharts.
-       * field: qu? dimensi?n representa este gráfico
+       * field: qué dimensión representa este gráfico
        * chartObj: referencia al objeto ApexCharts
-       * getLabel(seriesIndex, dataPointIndex, w): funci?n que devuelve el label del punto
+       * getLabel(seriesIndex, dataPointIndex, w): función que devuelve el label del punto
        */
       function attachChartTooltip(chartEl, field, getLabel) {
         chartEl.addEventListener('mouseleave', hideTxTooltip);
@@ -5789,7 +5506,7 @@
 
       /**
        * Inicializa los tooltips de detalle sobre cada gráfico.
-       * Se llama una vez despu?s de render() de todos los charts.
+       * Se llama una vez después de render() de todos los charts.
        * Usa el evento nativo 'apexcharts:dataPointMouseEnter' expuesto por ApexCharts.
        */
       function initChartTooltips() {
@@ -5912,27 +5629,28 @@
             document.querySelectorAll('.tx-table thead th').forEach(h => {
               h.classList.remove('tx-sort-active');
               const icon = h.querySelector('.tx-sort-icon');
-              if (icon) icon.textContent = '?';
+              if (icon) icon.textContent = '↕';
             });
             th.classList.add('tx-sort-active');
             const icon = th.querySelector('.tx-sort-icon');
-            if (icon) icon.textContent = txSortAsc ? '?' : '?';
+            if (icon) icon.textContent = txSortAsc ? '↑' : '↓';
             renderTransactions(); // re-render al cambiar orden
           });
         });
       }
 
       function handleError(err) {
-        document.getElementById('loader').classList.remove('active');
+        const loader = document.getElementById('loader');
+        if (loader) loader.classList.remove('active');
         const errorMsg = document.getElementById('errorMsg');
-        errorMsg.textContent = 'Error al cargar datos.';
-        const btn = document.createElement('button');
-        btn.textContent = 'Reintentar';
-        btn.style.cssText = 'margin-left:12px;padding:4px 12px;border:1px solid #C62828;background:#fff;color:#C62828;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px';
-        btn.addEventListener('click', applyFilters);
-        errorMsg.appendChild(btn);
-        errorMsg.style.display = 'block';
-        showToast('Error al cargar datos', 'error', 4000);
+        if (errorMsg) {
+          errorMsg.style.display = 'none';
+          errorMsg.textContent = '';
+          errorMsg.replaceChildren();
+        }
+        console.error('Error en el renderizado local del Portfolio Demo:', err);
+        // El portfolio no realiza solicitudes externas. Si un módulo visual falla,
+        // no debe presentar al usuario un falso mensaje de carga/API.
       }
 
       // -- CSV EXPORT --
@@ -5966,7 +5684,7 @@
       }
 
       // -----------------------------------------------------------
-      // NUEVAS FUNCIONES: Tendencias, Paginaci?n, Filtro por Chart
+      // NUEVAS FUNCIONES: Tendencias, Paginación, Filtro por Chart
       // -----------------------------------------------------------
 
       /** Renderiza indicadores de tendencia en las KPI cards */
@@ -6070,7 +5788,7 @@
         showToast(`Tabla filtrada: ${value}${tipoLabel}`, 'info', 2200);
       }
 
-      /** Actualizar controles de paginaci?n */
+      /** Actualizar controles de paginación */
       function updatePaginationUI(total) {
         const pag      = document.getElementById('txPagination');
         const prevBtn  = document.getElementById('txPrevBtn');
@@ -6083,7 +5801,7 @@
         const totalPages = Math.max(1, Math.ceil(total / TX_PAGE_SIZE));
         prevBtn.disabled = txCurrentPage <= 1;
         nextBtn.disabled = txCurrentPage >= totalPages;
-        pageInfo.textContent = `P?g. ${txCurrentPage} / ${totalPages}`;
+        pageInfo.textContent = `Pág. ${txCurrentPage} / ${totalPages}`;
         const start = (txCurrentPage - 1) * TX_PAGE_SIZE + 1;
         const end   = Math.min(txCurrentPage * TX_PAGE_SIZE, total);
         sizeInfo.textContent = `Mostrando ${start}?${end} de ${total}`;
@@ -6100,7 +5818,7 @@
         });
       }
 
-      /** Restaurar texto vac?o y ocultar overlays de gráficos */
+      /** Restaurar texto vacío y ocultar overlays de gráficos */
       function clearChartSkeletons() {
         ['emptyEvolucion','emptyDistribucion','emptyMedioPago','emptyCierreCaja','emptyIngVsEgr'].forEach(id => {
           const el = document.getElementById(id);
@@ -6112,7 +5830,7 @@
       }
 
       // ------------------------------------------------------------
-      // M?DULO PERFIL DE TRABAJADOR ? Cálculos laborales peruanos
+      // MÓDULO PERFIL DE TRABAJADOR ? Cálculos laborales peruanos
       // ------------------------------------------------------------
       var depWorkerProfile = null;
       var depChartInitialized = false;
@@ -6121,7 +5839,7 @@
       var FP_UIT = 5350;
 
       var FP_AFP_RATES = {
-        afp_integra:   0.1276,   // 10% fondo + 1.47% comisi?n + 1.35% seguro (aprox.)
+        afp_integra:   0.1276,   // 10% fondo + 1.47% comisión + 1.35% seguro (aprox.)
         afp_habitat:   0.1260,
         afp_prima:     0.1297,
         afp_profuturo: 0.1319,
@@ -6164,9 +5882,9 @@
 
       function fpRound2(v) { return Math.round((Number(v) || 0) * 100) / 100; }
 
-      // IR 5ta categoría (r?gimen general)
+      // IR 5ta categoría (régimen general)
       // Base = sueldo ? 14 (12 sueldos + 2 gratificaciones); la CTS no tributa
-      // Deducci?n: 7 UIT; tramos: 0?5UIT 8%, 5?20UIT 14%, 20?35UIT 17%, 35?45UIT 20%, >45UIT 30%
+      // Deducción: 7 UIT; tramos: 0?5UIT 8%, 5?20UIT 14%, 20?35UIT 17%, 35?45UIT 20%, >45UIT 30%
       function computeIR5ta(gross) {
         var annualBase = gross * 14;
         var taxable    = annualBase - (7 * FP_UIT);
@@ -6199,7 +5917,7 @@
         var monthlyIR      = fpRound2(annualIR / 12);
         var monthlyNet     = fpRound2(gross - pensionAmt - monthlyIR);
 
-        // Gratificaci?n: 1 sueldo bruto, exenta de AFP/ONP; IR proporcional al peso de las gratifs en la base anual
+        // Gratificación: 1 sueldo bruto, exenta de AFP/ONP; IR proporcional al peso de las gratifs en la base anual
         var gratifGross    = gross;
         var irOnGratif     = fpRound2(annualIR * (gratifGross / (gross * 14)));
         var gratifNet      = fpRound2(gratifGross - irOnGratif);
@@ -6357,13 +6075,13 @@
         var colLabel  = document.getElementById('fpDepYearEndColLabel');
         if (mode === 'extra') {
           if (titleEl)   titleEl.textContent  = 'Meta de ahorro desde hoy';
-          if (hintEl)    hintEl.textContent   = 'Cu?nto quieres ahorrar M?S de aqu? a diciembre. El sistema ajusta tu l?mite de gasto mensual para que llegues.';
+          if (hintEl)    hintEl.textContent   = 'Cuánto quieres ahorrar MÁS de aqué a diciembre. El sistema ajusta tu límite de gasto mensual para que llegues.';
           if (saveLabel) saveLabel.textContent = 'Meta adicional (dic)';
           if (modeChip)  modeChip.textContent  = 'Desde hoy';
           if (colLabel)  colLabel.textContent  = 'Proyección al 31 dic';
         } else {
           if (titleEl)   titleEl.textContent  = 'Meta de ahorro anual';
-          if (hintEl)    hintEl.textContent   = 'Cu?nto quieres tener ahorrado en TOTAL al cerrar el año. Se descuenta lo que ya llevas ? solo se calcula lo que falta para llegar.';
+          if (hintEl)    hintEl.textContent   = 'Cuánto quieres tener ahorrado en TOTAL al cerrar el año. Se descuenta lo que ya llevas ? solo se calcula lo que falta para llegar.';
           if (saveLabel) saveLabel.textContent = 'Meta total del año';
           if (modeChip)  modeChip.textContent  = 'Meta total';
           if (colLabel)  colLabel.textContent  = 'Tu meta al 31 dic';
@@ -6378,7 +6096,7 @@
 
       function updateDepGoal(profile) {
         if (!profile) return;
-        // Si los datos YTD del año completo a?n no est?n, p?delos en segundo plano
+        // Si los datos YTD del año completo aún no están, pídelos en segundo plano
         if (ytdKpisData === null) fetchYtdKpis();
         var target      = parseDepGoalValue();
         var remaining   = profile.remainingIncome;
@@ -6398,8 +6116,8 @@
         var ytdEl       = document.getElementById('fpYtdSavingsKpi');
         var ytdFootEl   = document.getElementById('fpYtdSavingsKpiFoot');
         var kpiTopLabel = document.getElementById('fpKpiTopLabel');
-        // Se actualizar? al final de la funci?n cuando conozcamos yearEndGoal;
-        // guardamos los elementos para usarlos despu?s.
+        // Se actualizará al final de la función cuando conozcamos yearEndGoal;
+        // guardamos los elementos para usarlos después.
 
         var mStr = monthsLeft === 1 ? '1 mes' : (monthsLeft + ' meses');
         var mode = parseDepGoalMode();
@@ -6420,7 +6138,7 @@
           if (saveEl)      { saveEl.textContent  = '?'; saveEl.style.color  = 'var(--text-primary)'; }
           if (spendFootEl) spendFootEl.textContent = 'Define tu meta para calcularlo';
           if (saveFootEl)  saveFootEl.textContent  = 'Al 31 de diciembre';
-          summaryEl.textContent = 'De este mes a diciembre recibir?s aprox. ' + fmtCurrency(remaining) + ' (' + mStr + ', incluyendo gratificaciones y CTS). Ingresa tu meta para ver tu plan personalizado.';
+          summaryEl.textContent = 'De este mes a diciembre recibirís aprox. ' + fmtCurrency(remaining) + ' (' + mStr + ', incluyendo gratificaciones y CTS). Ingresa tu meta para ver tu plan personalizado.';
           if (noteEl) noteEl.style.display = 'none';
           if (planEl) planEl.style.display = 'none';
           renderDepChart(profile, null);
@@ -6428,15 +6146,15 @@
           return;
         }
 
-        // -- Cálculo seg?n modo ----------------------------------------------
+        // -- Cálculo según modo ----------------------------------------------
         var spendable, yearEndGoal, needFromHere;
         if (mode === 'total') {
-          // target = cu?nto quiero tener EN TOTAL al 31 dic
+          // target = cuánto quiero tener EN TOTAL al 31 dic
           needFromHere = Math.max(0, fpRound2(target - ytdSavings));
           spendable    = fpRound2(remaining - needFromHere);
           yearEndGoal  = target;
         } else {
-          // target = cu?nto quiero sumar DESDE HOY (modo por defecto)
+          // target = cuánto quiero sumar DESDE HOY (modo por defecto)
           needFromHere = target;
           spendable    = fpRound2(remaining - target);
           yearEndGoal  = fpRound2(ytdSavings + target);
@@ -6467,7 +6185,7 @@
           if (mode === 'total') {
             summaryEl.textContent = 'Para llegar a ' + fmtCurrency(target) + ' total, necesitas sumar ' + fmtCurrency(needFromHere) + ' más, pero solo proyectas recibir ' + fmtCurrency(remaining) + '. Ajusta la meta.';
           } else {
-            summaryEl.textContent = 'Para ahorrar ' + fmtCurrency(target) + ' más necesitar?as más de lo que proyectas recibir (' + fmtCurrency(remaining) + '). Ajusta la meta.';
+            summaryEl.textContent = 'Para ahorrar ' + fmtCurrency(target) + ' más necesitarías más de lo que proyectas recibir (' + fmtCurrency(remaining) + '). Ajusta la meta.';
           }
           if (noteEl) { noteEl.style.display = ''; noteEl.textContent = '* Proyección basada en ingresos laborales netos (sueldo + gratificaciones + CTS).'; }
           if (planEl) planEl.style.display = 'none';
@@ -6484,12 +6202,12 @@
         var avgSpend = fpRound2(spendable / monthsLeft);
         if (spendEl)     { spendEl.textContent = fmtCurrency(avgSpend); spendEl.style.color = '#059669'; }
         if (saveEl)      { saveEl.textContent  = fmtCurrency(yearEndGoal); saveEl.style.color = '#4F46E5'; }
-        if (spendFootEl) spendFootEl.textContent = 'Respeta este monto y las gratificaciones/CTS completar?n tu meta';
+        if (spendFootEl) spendFootEl.textContent = 'Respeta este monto y las gratificaciones/CTS completarán tu meta';
         if (saveFootEl)  saveFootEl.textContent  = mode === 'total' ? 'Meta total del año' : 'Proyección al 31 dic';
         if (mode === 'total') {
-          summaryEl.textContent = 'Ya llevas ' + fmtCurrency(ytdSavings) + '. Para alcanzar ' + fmtCurrency(target) + ' total, necesitas sumar ' + fmtCurrency(needFromHere) + ' más ? gasta m?ximo ' + fmtCurrency(avgSpend) + '/mes y las gratificaciones har?n el resto.';
+          summaryEl.textContent = 'Ya llevas ' + fmtCurrency(ytdSavings) + '. Para alcanzar ' + fmtCurrency(target) + ' total, necesitas sumar ' + fmtCurrency(needFromHere) + ' más ? gasta máximo ' + fmtCurrency(avgSpend) + '/mes y las gratificaciones harán el resto.';
         } else {
-          summaryEl.textContent = 'Con ' + fmtCurrency(remaining) + ' proyectados hasta diciembre, gasta m?ximo ' + fmtCurrency(avgSpend) + ' al mes y sumar?s ' + fmtCurrency(target) + ' a tu ahorro (llegando a ' + fmtCurrency(yearEndGoal) + ' al 31 dic).';
+          summaryEl.textContent = 'Con ' + fmtCurrency(remaining) + ' proyectados hasta diciembre, gasta máximo ' + fmtCurrency(avgSpend) + ' al mes y sumarís ' + fmtCurrency(target) + ' a tu ahorro (llegando a ' + fmtCurrency(yearEndGoal) + ' al 31 dic).';
         }
 
         if (planEl) {
@@ -6499,7 +6217,7 @@
           if (tableEl) tableEl.innerHTML = buildPlanTableHTML(profile, avgSpend, mode === 'total' ? needFromHere : target);
         }
 
-        if (noteEl) { noteEl.style.display = ''; noteEl.textContent = '* Los meses de gratificaci?n (jul, dic) y CTS (may, nov) son los que más suman a tu ahorro ? ?salos para adelantar o superar la meta.'; }
+        if (noteEl) { noteEl.style.display = ''; noteEl.textContent = '* Los meses de gratificación (jul, dic) y CTS (may, nov) son los que más suman a tu ahorro ? ?salos para adelantar o superar la meta.'; }
         localStorage.setItem('fpDepGoalTarget', target);
         setKpiYearEnd(
           mode === 'total' ? 'Tu meta al 31 dic' : 'Proyección al 31 dic',
@@ -6573,9 +6291,9 @@
 
         if (ytdKpisData) {
           cur = { income: ytdKpisData.income, expense: ytdKpisData.expense };
-          // NO asignamos histByYear[year] = cur aqu? ? si lo hici?ramos, el loop de
-          // allTransactions mutar?a cur directamente (mismo objeto por referencia),
-          // sumando el año actual dos veces. Lo asignamos DESPU?S del loop.
+          // NO asignamos histByYear[year] = cur aqué ? si lo hiciéramos, el loop de
+          // allTransactions mutaría cur directamente (mismo objeto por referencia),
+          // sumando el año actual dos veces. Lo asignamos DESPUÉS del loop.
         }
         if (allTransactions && allTransactions.length > 0) {
           allTransactions.forEach(function(r) {
@@ -6622,19 +6340,19 @@
           // Sin meta: mostrar ahorrado como hecho, sin barra de plan
           if (barFill) { barFill.style.width = '0%'; }
           if (barPlan) { barPlan.style.left = '0%'; barPlan.style.width = '0%'; }
-          if (pctEl)   { pctEl.textContent = hasData ? fmtCurrency(ytdSavings) + ' ahorrado hasta hoy' : '?'; pctEl.style.color = '#059669'; }
+          if (pctEl)   { pctEl.textContent = hasData ? fmtCurrency(ytdSavings) + ' ahorrado hasta hoy' : '—'; pctEl.style.color = '#059669'; }
           if (goalLabelEl) goalLabelEl.textContent = 'Define una meta para ver tu plan';
-          if (yearEndValEl) { yearEndValEl.textContent = hasData ? fmtCurrency(ytdSavings) : '?'; yearEndValEl.style.color = '#059669'; }
+          if (yearEndValEl) { yearEndValEl.textContent = hasData ? fmtCurrency(ytdSavings) : '—'; yearEndValEl.style.color = '#059669'; }
           if (yearEndSubEl) yearEndSubEl.textContent = hasData ? 'Balance actual del año' : '';
         } else {
           // Con meta: calcular relleno verde (ya tienes) + ?ndigo (plan)
           var pctGreen = 0, pctIndigo = 0;
           if (mode === 'total') {
-            // verde = ya logrado vs meta; ?ndigo = porci?n que falta
+            // verde = ya logrado vs meta; ?ndigo = porción que falta
             pctGreen  = Math.round(Math.min(100, Math.max(0, (ytdSavings / yearEndGoal) * 100)));
             pctIndigo = Math.min(100 - pctGreen, Math.round(Math.max(0, ((yearEndGoal - Math.max(ytdSavings, 0)) / yearEndGoal) * 100)));
           } else {
-            // verde = porci?n YTD del objetivo al 31 dic; ?ndigo = porci?n del plan restante
+            // verde = porción YTD del objetivo al 31 dic; ?ndigo = porción del plan restante
             if (yearEndGoal > 0) {
               pctGreen  = Math.round(Math.min(100, Math.max(0, (ytdSavings / yearEndGoal) * 100)));
               pctIndigo = Math.min(100 - pctGreen, Math.round((target / yearEndGoal) * 100));
@@ -6893,8 +6611,8 @@
         if (!charts.depSalary) return;
         var d = buildDepChartData(profile, avgSpend !== undefined ? avgSpend : null);
 
-        // L?neas verticales de gratif/CTS ? sin etiqueta en el SVG;
-        // los chips se renderizan en HTML despu?s del render del chart.
+        // Líneas verticales de gratif/CTS ? sin etiqueta en el SVG;
+        // los chips se renderizan en HTML después del render del chart.
         var annX = [];
         profile.calendar.forEach(function(m) {
           if (!m.isGratif && !m.isCTS) return;
@@ -6908,7 +6626,7 @@
           });
         });
 
-        // Actualizar leyenda din?mica
+        // Actualizar leyenda dinámica
         var legendBudgetLabel = document.getElementById('fpDepChartLegendBudgetLabel');
         if (legendBudgetLabel) {
           legendBudgetLabel.textContent = (avgSpend !== null && avgSpend !== undefined)
@@ -6981,7 +6699,7 @@
           chips.push('<label class="fp-received-chip' + (rf.gratif ? ' checked' : '') + '" id="fpRcLabelGratif">' +
             '<input type="checkbox" id="fpRcGratif"' + (rf.gratif ? ' checked' : '') + ' onchange="onReceivedChange()">' +
             '<span class="fp-rc-dot"></span>' +
-            'Gratificaci?n de ' + monthLabel +
+            'Gratificación de ' + monthLabel +
             ' (' + fmtCurrency(profile.gratifNet) + ')' +
             '</label>');
         }
@@ -7107,7 +6825,7 @@
         const btnDark = document.getElementById('btnDark');
 
         // Actualiza colores internos de ApexCharts (ejes, leyendas, labels)
-        // que no responden a CSS porque est?n hardcodeados en las opciones del chart.
+        // que no responden a CSS porque están hardcodeados en las opciones del chart.
         function applyChartsTheme(isDark) {
           const textColor  = isDark ? '#94A3B8' : '#5C6F84';
           const gridColor  = isDark ? 'rgba(56,189,248,0.07)' : 'rgba(99,102,241,0.10)';
@@ -7141,7 +6859,7 @@
           btnDark.textContent = theme === 'dark' ? '☀️' : '🌙';
           applyChartsTheme(theme === 'dark');
         }
-        // Inicializar icono seg?n localStorage
+        // Inicializar icono según localStorage
         const savedTheme = localStorage.getItem('dashTheme') || 'light';
         applyTheme(savedTheme);
         btnDark.addEventListener('click', () => {
@@ -7161,7 +6879,7 @@
           btnViewForecast.addEventListener('click', () => setActiveView('forecast'));
         }
 
-        // B?squeda en tabla (debounce)
+        // Búsqueda en tabla (debounce)
         let _searchTimer = null;
         document.getElementById('txSearchInput').addEventListener('input', e => {
           clearTimeout(_searchTimer);
@@ -7178,7 +6896,7 @@
 
         const forecastTargetInput = document.getElementById('forecastTargetInput');
         if (forecastTargetInput) {
-          // Al hacer focus: quitar el formato para que el usuario pueda editar el n?mero libremente
+          // Al hacer focus: quitar el formato para que el usuario pueda editar el número libremente
           forecastTargetInput.addEventListener('focus', function() {
             const raw = this.value.replace(/,/g, '').trim();
             if (raw && !isNaN(Number(raw))) this.value = raw;
@@ -7241,7 +6959,7 @@
 
         document.getElementById('moneda').addEventListener('change', applyFilters);
 
-        // Bot?n cerrar alertas meta (dismiss por mes)
+        // Botón cerrar alertas meta (dismiss por mes)
         const metaDismissBtn = document.getElementById('metaDismissBtn');
         if (metaDismissBtn) {
           metaDismissBtn.addEventListener('click', () => {
@@ -7250,7 +6968,7 @@
             const d = new Date(fInicio + 'T12:00:00');
             const key = 'BUDGET_DISMISSED_' + d.getFullYear() + '_' + String(d.getMonth() + 1).padStart(2, '0');
             localStorage.setItem(key, '1');
-            // Solo ocultar la secci?n de alertas ? el panel siempre queda visible
+            // Solo ocultar la sección de alertas ? el panel siempre queda visible
             const alertsEl = document.getElementById('alertsContent');
             if (alertsEl) { alertsEl.style.display = 'none'; alertsEl.innerHTML = ''; }
             metaDismissBtn.style.display = 'none';
@@ -7271,7 +6989,7 @@
         document.getElementById('btnHistorico').addEventListener('click', applyHistorico);
         document.getElementById('btnMesActual').addEventListener('click', applyMesActual);
 
-        // El dropdown de año se puebla din?micamente en loadCategoriesAndInit
+        // El dropdown de año se puebla dinámicamente en loadCategoriesAndInit
         // con el año más antiguo real de la base de datos.
 
         document.getElementById('filtroAnio').addEventListener('change', applyMesAnioFilter);
@@ -7280,7 +6998,7 @@
         document.getElementById('fInicio').addEventListener('change', function() { setActiveShortcut(null); resetPeriodDropdowns(); });
         document.getElementById('fFin').addEventListener('change', function() { setActiveShortcut(null); resetPeriodDropdowns(); });
 
-        // Bot?n volver arriba
+        // Botón volver arriba
         const btnTop = document.getElementById('btnTop');
         window.addEventListener('scroll', function() {
           if (window.scrollY > 300) btnTop.classList.add('visible');
