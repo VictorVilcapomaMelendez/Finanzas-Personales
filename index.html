@@ -1,19 +1,20 @@
-  <!--
+ <!--
     Dashboard Financiero Personal - Portfolio Demo
     Version estatica para portafolio profesional (GitHub Pages).
     Todos los datos mostrados son ficticios y generados localmente.
   -->
-  <!DOCTYPE html>
-  <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Dashboard Financiero Personal</title>
-    <meta name="description" content="Dashboard de finanzas personales - Portfolio demo con datos ficticios. Desarrollado con HTML, CSS y JavaScript puro." />
-    <meta name="viewport" content="width=1280" />
-    <meta name="color-scheme" content="light dark" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; frame-ancestors 'none';" />
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0"></script>
-    <style>
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<title>Finanzas Personales · Portfolio Demo</title>
+<meta content="Dashboard de finanzas personales para portfolio, con datos ficticios locales. Sin APIs ni credenciales personales." name="description"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="light dark" name="color-scheme"/>
+<meta content="default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; frame-ancestors 'none';" http-equiv="Content-Security-Policy"/>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0"></script>
+<style>
       :root {
         --blue-dark:       #1E1B4B;
         --white:           #FFFFFF;
@@ -2576,715 +2577,764 @@
         .kpi-row { gap: 14px; }
       }
     </style>
-  </head>
-  <body>
+<style>
+/* =========================================================
+   PORTFOLIO — VISUAL SYSTEM MATCHING THE MAIN DASHBOARD
+   Public demo: local dummy data only. No private APIs/keys.
+   ========================================================= */
+:root{
+  --app-bg:#f4f7fb;
+  --app-surface:#ffffff;
+  --app-surface-2:#f8fafc;
+  --app-border:#e5e7eb;
+  --app-text:#111827;
+  --app-muted:#6b7280;
+  --app-primary:#2563eb;
+  --app-primary-2:#1d4ed8;
+  --app-green:#059669;
+  --app-red:#dc2626;
+  --app-shadow:0 10px 30px rgba(15,23,42,.07);
+}
+[data-theme="dark"]{
+  --app-bg:#0b1120;
+  --app-surface:#111827;
+  --app-surface-2:#0f172a;
+  --app-border:#243244;
+  --app-text:#e5e7eb;
+  --app-muted:#94a3b8;
+  --app-primary:#60a5fa;
+  --app-primary-2:#3b82f6;
+  --app-shadow:0 14px 36px rgba(0,0,0,.28);
+}
+html,body{min-height:100%;}
+body{
+  margin:0!important;
+  background:var(--app-bg)!important;
+  color:var(--app-text)!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  overflow-x:hidden!important;
+}
+.sidebar{
+  position:fixed!important;left:0;top:0;bottom:0;width:248px!important;z-index:1000;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:22px 16px!important;box-sizing:border-box;
+  background:var(--app-surface)!important;border-right:1px solid var(--app-border)!important;
+  box-shadow:8px 0 28px rgba(15,23,42,.035)!important;
+}
+.sidebar-top{min-height:0!important}.sidebar-bottom{margin-top:auto!important}
+.brand-section{display:flex!important;align-items:center!important;gap:11px!important;margin:0 4px 26px!important}
+.brand-icon{width:40px!important;height:40px!important;border-radius:12px!important;display:grid!important;place-items:center!important;background:linear-gradient(135deg,#2563eb,#4f46e5)!important;color:white!important;box-shadow:0 8px 18px rgba(37,99,235,.22)!important}
+.brand-title{color:var(--app-text)!important;font-weight:800!important;font-size:14px!important}.brand-sub{color:var(--app-muted)!important;font-size:10px!important;margin-top:2px!important}
+.nav-group-label{font-size:10px!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:var(--app-muted)!important;font-weight:800!important;margin:18px 7px 7px!important}
+.nav-list{margin:0!important;padding:0!important;list-style:none!important;display:grid!important;gap:4px!important}
+.nav-btn{width:100%!important;display:flex!important;align-items:center!important;gap:9px!important;padding:10px 11px!important;border-radius:10px!important;border:1px solid transparent!important;background:transparent!important;color:var(--app-muted)!important;text-align:left!important;font-size:12px!important;font-weight:700!important;cursor:pointer!important}
+.nav-btn:hover{background:var(--app-surface-2)!important;color:var(--app-text)!important}.nav-btn.active{background:rgba(37,99,235,.09)!important;color:var(--app-primary)!important;border-color:rgba(37,99,235,.12)!important}
+.shortcut-key{margin-left:auto!important;font-size:9px!important;color:var(--app-muted)!important;background:var(--app-surface-2)!important;padding:2px 5px!important;border-radius:5px!important}
+.sidebar-widget{margin-top:18px!important;padding:12px!important;border:1px solid var(--app-border)!important;background:var(--app-surface-2)!important;border-radius:12px!important}
+.sidebar-widget-head{display:flex!important;justify-content:space-between!important;align-items:center!important;font-size:11px!important;font-weight:800!important}.sidebar-widget-sub{font-size:9px!important;color:var(--app-muted)!important;margin-top:5px!important;line-height:1.35!important}.demo-status{font-size:8px!important;color:var(--app-green)!important;font-weight:900!important}
+.sidebar-demo-note{font-size:9px!important;color:var(--app-muted)!important;margin:0 4px 10px!important}
+.sidebar-footer-row{display:flex!important;gap:8px!important;align-items:center!important}.btn-icon-sidebar{width:38px!important;height:38px!important;border:1px solid var(--app-border)!important;background:var(--app-surface)!important;color:var(--app-text)!important;border-radius:10px!important}.btn-new-tx-sidebar{flex:1!important;height:38px!important;border:0!important;border-radius:10px!important;background:var(--app-text)!important;color:var(--app-surface)!important;font-weight:800!important}
+.top-header{position:sticky!important;top:0!important;z-index:900!important;margin-left:248px!important;width:calc(100% - 248px)!important;box-sizing:border-box!important;height:64px!important;padding:0 28px!important;background:rgba(255,255,255,.88)!important;border-bottom:1px solid var(--app-border)!important;backdrop-filter:blur(14px)!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
+[data-theme="dark"] .top-header{background:rgba(17,24,39,.88)!important}
+.header-left,.header-right{display:flex!important;align-items:center!important;gap:10px!important}.period-chip{border:1px solid var(--app-border)!important;background:var(--app-surface-2)!important;color:var(--app-text)!important;border-radius:999px!important;padding:7px 11px!important;font-size:11px!important;font-weight:800!important}.header-loader{font-size:10px!important;color:var(--app-green)!important;font-weight:800!important}
+.container{margin-left:248px!important;width:calc(100% - 248px)!important;max-width:none!important;box-sizing:border-box!important;padding:20px 28px 40px!important;background:var(--app-bg)!important}
+.dashboard-topbar{background:transparent!important;border:0!important;box-shadow:none!important;padding:0 0 12px!important}.portfolio-topbar{min-height:32px!important}.portfolio-topbar .view-switcher{background:var(--app-surface)!important;border:1px solid var(--app-border)!important;box-shadow:var(--app-shadow)!important;border-radius:12px!important}
+.filters,.dashboard-view,.grid,.tx-section,.forecast-panel,.meta-panel,.fp-profile-bar,.fp-module,.forecast-grid,.kpi-card{border-color:var(--app-border)!important}
+.filters{background:var(--app-surface)!important;box-shadow:var(--app-shadow)!important;border-radius:14px!important}.dashboard-view{background:transparent!important}.kpi-row{gap:14px!important}.kpi-card{background:var(--app-surface)!important;box-shadow:var(--app-shadow)!important;border-radius:14px!important}
+.grid{gap:14px!important}.grid>.card,.chart-card,.tx-section,.meta-panel,.forecast-panel{background:var(--app-surface)!important;box-shadow:var(--app-shadow)!important;border-radius:14px!important}
+.card-header,.section-header{color:var(--app-text)!important}.muted,.subtitle,.card-subtitle{color:var(--app-muted)!important}
+.mobile-mode-banner{display:none;position:fixed;left:14px;right:14px;bottom:14px;z-index:2000;background:var(--app-surface);border:1px solid var(--app-border);border-radius:16px;box-shadow:0 18px 50px rgba(15,23,42,.18);padding:13px;gap:12px;align-items:center}.mobile-mode-copy{display:flex;flex-direction:column;gap:3px;flex:1}.mobile-mode-copy strong{font-size:12px}.mobile-mode-copy span{font-size:10px;color:var(--app-muted);line-height:1.35}.mobile-mode-actions{display:flex;gap:7px}.mobile-primary-btn,.mobile-secondary-btn{border-radius:9px;padding:8px 10px;font-size:10px;font-weight:800;cursor:pointer}.mobile-primary-btn{border:0;background:var(--app-primary);color:white}.mobile-secondary-btn{border:1px solid var(--app-border);background:var(--app-surface);color:var(--app-text)}
+.mobile-mode-toggle{display:none;position:fixed;right:14px;bottom:14px;z-index:1900;border:1px solid var(--app-border);background:var(--app-surface);color:var(--app-text);border-radius:999px;padding:9px 12px;box-shadow:0 10px 30px rgba(15,23,42,.15);font-size:10px;font-weight:800}
+#btnTop{z-index:1800!important}
 
-    <header class="header">
-      <h1>Dashboard Financiero</h1>
-      <p>Control de Ingresos, Egresos y Balance</p>
-      <span class="header-update-chip" id="lastUpdateChip">⏱ Esperando datos...</span>
-    </header>
+/* Explicit mobile mode — same visual language, different composition. */
+@media (max-width:700px){
+  body.mobile-mode .sidebar{display:none!important}
+  body.mobile-mode .top-header{margin-left:0!important;width:100%!important;height:auto!important;min-height:60px!important;padding:10px 14px!important}
+  body.mobile-mode .container{margin-left:0!important;width:100%!important;padding:12px 12px 30px!important}
+  body.mobile-mode .header-left{min-width:0}.header-left .active-filter-chips{display:none!important}
+  body.mobile-mode .header-right .header-loader{display:none!important}
+  body.mobile-mode .dashboard-topbar{padding-bottom:8px!important}
+  body.mobile-mode .dashboard-topbar .view-switcher{width:100%!important}
+  body.mobile-mode .filters{padding:12px!important}
+  body.mobile-mode .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.mobile-mode .kpi-card:first-child{grid-column:1/-1!important}
+  body.mobile-mode .kpi-card{min-height:104px!important;padding:13px!important}
+  body.mobile-mode .kpi-value{font-size:21px!important}
+  body.mobile-mode .grid{grid-template-columns:1fr!important}
+  body.mobile-mode .grid>*{grid-column:span 1!important;min-width:0!important}
+  body.mobile-mode .chart-card{min-height:300px!important}
+  body.mobile-mode .tx-section{overflow-x:auto!important}
+  body.mobile-mode .forecast-grid{grid-template-columns:1fr!important}
+  body.mobile-mode .meta-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.mobile-mode .fp-dep-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  body.mobile-mode .fp-cal-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  body.mobile-mode .mobile-mode-toggle{display:block}
+  body.mobile-mode .mobile-mode-banner{display:none!important}
+  body:not(.mobile-mode) .mobile-mode-banner.show{display:flex}
+  body:not(.mobile-mode) .mobile-mode-toggle{display:block}
+}
+@media (min-width:701px){.mobile-mode-toggle,.mobile-mode-banner{display:none!important}}
 
-    <main class="container">
-
-      <!-- Toast container -->
-      <div id="toastContainer" aria-live="polite"></div>
-
-      <!-- Periodo activo y selector de vista -->
-      <div class="dashboard-topbar">
-        <div class="period-badge" id="periodBadge" style="display:none">
-          📅 Mostrando: <strong id="periodBadgeText">Mar 2026</strong>
-        </div>
-
-        <section class="view-switcher" aria-label="Cambiar vista del dashboard">
-          <button type="button" class="view-switcher-btn active" id="btnViewDescriptive" title="Ver dashboard descriptivo" aria-pressed="true">📊 Vista Descriptiva</button>
-          <button type="button" class="view-switcher-btn" id="btnViewForecast" title="Ver pronóstico" aria-pressed="false">🔮 Vista Predictiva</button>
-        </section>
-      </div>
-
-      <div id="errorMsg"></div>
-
-      <section class="filters">
-        <!-- Moneda -->
-        <div class="group">
-          <label for="moneda">Moneda:</label>
-          <select id="moneda">
-            <option value="PEN" selected>Soles (S/.)</option>
-            <option value="USD">Dólares ($)</option>
-          </select>
-        </div>
-
-        <!-- Filtro de Tipo -->
-        <div class="group">
-          <label for="filtroTipo">Tipo:</label>
-          <select id="filtroTipo">
-            <option value="Total" selected>Total</option>
-            <option value="Ingreso">Ingreso</option>
-            <option value="Egreso">Egreso</option>
-          </select>
-        </div>
-
-        <!-- Filtro de Categoria -->
-        <div class="group">
-          <label for="filtroCategoria">Categoría:</label>
-          <select id="filtroCategoria">
-            <option value="Todas" selected>Todas</option>
-          </select>
-        </div>
-
-        <div class="group">
-          <label for="fInicio">Desde:</label>
-          <input type="date" id="fInicio" />
-        </div>
-        <div class="group">
-          <label for="fFin">Hasta:</label>
-          <input type="date" id="fFin" />
-        </div>
-
-        <!-- Filtro rápido por Mes/Año -->
-        <div class="group filter-separator">
-          <label for="filtroAnio">Año:</label>
-          <select id="filtroAnio" title="Filtrar por año">
-            <option value="">Año</option>
-          </select>
-        </div>
-        <div class="group">
-          <label for="filtroMes">Mes:</label>
-          <select id="filtroMes" title="Filtrar por mes del año seleccionado">
-            <option value="">Todo el año</option>
-            <option value="0">Enero</option>
-            <option value="1">Febrero</option>
-            <option value="2">Marzo</option>
-            <option value="3">Abril</option>
-            <option value="4">Mayo</option>
-            <option value="5">Junio</option>
-            <option value="6">Julio</option>
-            <option value="7">Agosto</option>
-            <option value="8">Septiembre</option>
-            <option value="9">Octubre</option>
-            <option value="10">Noviembre</option>
-            <option value="11">Diciembre</option>
-          </select>
-        </div>
-
-        <!-- Botón Histórico -->
-        <button id="btnHistorico" class="btn-shortcut" title="Desde la fecha más antigua hasta hoy (Alt+H)" aria-label="Ver histórico completo">
-          📈 Histórico<span class="shortcut-hint">Alt+H</span>
-        </button>
-        <!-- Botón Mes Actual -->
-        <button id="btnMesActual" class="btn-shortcut" title="Desde el inicio del mes actual hasta hoy (Alt+M)" aria-label="Ver mes actual">
+/* Mobile-specific layout is opt-in: desktop stays as the main portfolio presentation. */
+body.mobile-mode{background:var(--app-bg)!important}
+body.mobile-mode .container{overflow:visible!important}
+body.mobile-mode .filters{position:static!important}
+body.mobile-mode .dashboard-view{overflow:visible!important}
+body.mobile-mode .grid{overflow:visible!important}
+body.mobile-mode .card,.body.mobile-mode .chart-card{min-width:0!important}
+</style></head>
+<body>
+&lt;!-- PUBLIC PORTFOLIO BUILD: uses only the dummy/local data already contained in this file. No personal APIs, tokens, keys, OAuth, fetch, or private endpoints. --&gt;
+<aside aria-label="Navegación del Dashboard" class="sidebar"><div class="sidebar-top"><div class="brand-section"><div class="brand-icon">💳</div><div class="brand-text"><span class="brand-title">Finanzas Personales</span><span class="brand-sub">Portfolio · Datos ficticios</span></div></div><div class="nav-group-label">Vistas Analíticas</div><ul class="nav-list"><li><button aria-pressed="true" class="view-switcher-btn active" id="btnViewDescriptive" title="Ver dashboard descriptivo" type="button">📊 Vista Descriptiva</button></li><li><button aria-pressed="false" class="view-switcher-btn" id="btnViewForecast" title="Ver pronóstico" type="button">🔮 Vista Predictiva</button></li></ul><div class="nav-group-label">Acciones Rápidas</div><ul class="nav-list"><li><button aria-label="Ver mes actual" class="btn-shortcut" id="btnMesActual" title="Desde el inicio del mes actual hasta hoy (Alt+M)">
           🗓 Mes Actual<span class="shortcut-hint">Alt+M</span>
-        </button>
+</button></li><li><button aria-label="Ver histórico completo" class="btn-shortcut" id="btnHistorico" title="Desde la fecha más antigua hasta hoy (Alt+H)">
+          📈 Histórico<span class="shortcut-hint">Alt+H</span>
+</button></li><li><button aria-label="Actualizar datos" id="btnAplicar" title="Actualizar datos (Alt+R)">↻ Actualizar<span class="shortcut-hint">Alt+R</span></button></li><li><button aria-label="Limpiar todos los filtros" class="btn-clear" id="btnLimpiar" title="Limpiar filtros y volver al mes actual (Alt+L)">🧹 Limpiar<span class="shortcut-hint">Alt+L</span></button></li></ul><div class="sidebar-widget" id="portfolioDemoWidget"><div class="sidebar-widget-head"><span>🧪 Portfolio Demo</span><span class="demo-status">LOCAL</span></div><div class="sidebar-widget-sub">Datos ficticios · sin credenciales personales</div></div></div><div class="sidebar-bottom"><div class="sidebar-demo-note">🔒 Sin APIs privadas</div><div class="sidebar-footer-row"><button aria-label="Activar o desactivar modo oscuro" class="btn-icon-sidebar" id="btnDark" title="Cambiar modo oscuro/claro">🌙</button><button aria-label="Registrar nueva transacci?n" class="btn-new-tx-sidebar" id="btnNewTx" title="Registrar nueva transacci?n"><span>+</span> Nueva Tx</button></div></div></aside><div aria-label="Vista móvil optimizada" class="mobile-mode-banner" id="mobileModeBanner" role="dialog"><div class="mobile-mode-copy"><strong>📱 ¿Estás usando un teléfono?</strong><span>Activa la vista móvil para una lectura más cómoda y gráficos optimizados.</span></div><div class="mobile-mode-actions"><button class="mobile-primary-btn" id="btnEnableMobileMode" type="button">Activar</button><button class="mobile-secondary-btn" id="btnDismissMobileMode" type="button">Ahora no</button></div></div>
+<header class="top-header"><div class="header-left"><div class="period-chip" id="portfolioStatusChip">🧪 Portfolio Demo</div><div class="active-filter-chips" id="activeFilterChipsHeader"></div></div><div class="header-right"><span class="header-loader" id="portfolioHeaderLoader">✓ Datos locales</span></div></header>
+<main class="container">
+<!-- Toast container -->
+<div aria-live="polite" id="toastContainer"></div>
+<!-- Periodo activo y selector de vista -->
+<div class="dashboard-topbar portfolio-topbar">
+<div class="period-badge" id="periodBadge" style="display:none">
+          📅 Mostrando: <strong id="periodBadgeText">Mar 2026</strong>
+</div>
+<section aria-label="Cambiar vista del dashboard" class="view-switcher">
 
-        <button id="btnAplicar" title="Actualizar datos (Alt+R)" aria-label="Actualizar datos">↻ Actualizar<span class="shortcut-hint">Alt+R</span></button>
-        <button id="btnLimpiar" class="btn-clear" title="Limpiar filtros y volver al mes actual (Alt+L)" aria-label="Limpiar todos los filtros">🧹 Limpiar<span class="shortcut-hint">Alt+L</span></button>
-        <span class="loading-indicator" id="loader">Cargando datos...</span>
-      </section>
 
-      <div id="descriptiveView" class="dashboard-view active">
+</section>
+</div>
+<div id="errorMsg"></div>
+<section class="filters">
+<!-- Moneda -->
+<div class="group">
+<label for="moneda">Moneda:</label>
+<select id="moneda">
+<option selected="" value="PEN">Soles (S/.)</option>
+<option value="USD">Dólares ($)</option>
+</select>
+</div>
+<!-- Filtro de Tipo -->
+<div class="group">
+<label for="filtroTipo">Tipo:</label>
+<select id="filtroTipo">
+<option selected="" value="Total">Total</option>
+<option value="Ingreso">Ingreso</option>
+<option value="Egreso">Egreso</option>
+</select>
+</div>
+<!-- Filtro de Categoria -->
+<div class="group">
+<label for="filtroCategoria">Categoría:</label>
+<select id="filtroCategoria">
+<option selected="" value="Todas">Todas</option>
+</select>
+</div>
+<div class="group">
+<label for="fInicio">Desde:</label>
+<input id="fInicio" type="date"/>
+</div>
+<div class="group">
+<label for="fFin">Hasta:</label>
+<input id="fFin" type="date"/>
+</div>
+<!-- Filtro rápido por Mes/Año -->
+<div class="group filter-separator">
+<label for="filtroAnio">Año:</label>
+<select id="filtroAnio" title="Filtrar por año">
+<option value="">Año</option>
+</select>
+</div>
+<div class="group">
+<label for="filtroMes">Mes:</label>
+<select id="filtroMes" title="Filtrar por mes del año seleccionado">
+<option value="">Todo el año</option>
+<option value="0">Enero</option>
+<option value="1">Febrero</option>
+<option value="2">Marzo</option>
+<option value="3">Abril</option>
+<option value="4">Mayo</option>
+<option value="5">Junio</option>
+<option value="6">Julio</option>
+<option value="7">Agosto</option>
+<option value="8">Septiembre</option>
+<option value="9">Octubre</option>
+<option value="10">Noviembre</option>
+<option value="11">Diciembre</option>
+</select>
+</div>
+<!-- Botón Histórico -->
 
-      <!-- Panel de Presupuesto Mensual -->
-      <section class="meta-panel" id="metaPanel">
-        <div class="meta-header">
-          <div class="meta-title">
-            <span id="metaIcon">💰</span>
-            <div style="display:flex;flex-direction:column;gap:1px">
-              <span id="metaTitleText">Presupuesto del Mes</span>
-              <span class="meta-subtitle" id="metaSubtitle"></span>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="meta-badge" id="metaBadge">Dentro de Presupuesto</div>
-            <button class="meta-dismiss-btn" id="metaDismissBtn" title="Cerrar alertas este mes" aria-label="Cerrar alertas este mes" style="display:none">×</button>
-          </div>
-        </div>
-        <div id="metaNoMetaMsg" class="meta-no-meta-msg" style="display:none">
-          <span class="meta-no-meta-icon">📋</span>
-          <strong>Sin presupuesto configurado</strong>
+<!-- Botón Mes Actual -->
+
+
+
+<span class="loading-indicator" id="loader">Cargando datos...</span>
+</section>
+<div class="dashboard-view active" id="descriptiveView">
+<!-- Panel de Presupuesto Mensual -->
+<section class="meta-panel" id="metaPanel">
+<div class="meta-header">
+<div class="meta-title">
+<span id="metaIcon">💰</span>
+<div style="display:flex;flex-direction:column;gap:1px">
+<span id="metaTitleText">Presupuesto del Mes</span>
+<span class="meta-subtitle" id="metaSubtitle"></span>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<div class="meta-badge" id="metaBadge">Dentro de Presupuesto</div>
+<button aria-label="Cerrar alertas este mes" class="meta-dismiss-btn" id="metaDismissBtn" style="display:none" title="Cerrar alertas este mes">×</button>
+</div>
+</div>
+<div class="meta-no-meta-msg" id="metaNoMetaMsg" style="display:none">
+<span class="meta-no-meta-icon">📋</span>
+<strong>Sin presupuesto configurado</strong>
           No hay un presupuesto de gasto registrado para este periodo.
           Puedes agregar una fila de tipo <em>Presupuesto</em> en tu hoja de cálculo para este mes.
         </div>
-        <div id="alertsContent" class="meta-inline-alerts" style="display:none"></div>
-        <div id="metaPosMsg" class="meta-pos-msg" style="display:none"></div>
-        <div id="metaGaugeSection">
-        <div class="meta-gauge">
-          <div class="gauge-container">
-            <div class="gauge-pace-marker" id="gaugePaceMarker" style="display:none"></div>
-            <div class="gauge-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Porcentaje del presupuesto gastado" id="gaugeBar">
-              <div class="gauge-fill" id="gaugeFill"></div>
-            </div>
-            <div class="gauge-markers">
-              <span class="marker-0">0%</span>
-              <span class="marker-70">70%</span>
-              <span class="marker-100">100%</span>
-            </div>
-          </div>
-          <div class="gauge-pct-chip" id="gaugePctLabel">
-            <span class="gauge-pct-emoji">●</span>
-            <span class="gauge-pct-number">0%</span>
-            <span class="gauge-pct-sub">del presupuesto</span>
-          </div>
-        </div>
-        <div class="meta-stats" id="metaStatsSection">
-          <div class="meta-stat">
-            <div class="meta-stat-label">Presupuesto</div>
-            <div class="meta-stat-value" id="metaValor">S/. 0.00</div>
-          </div>
-          <div class="meta-stat">
-            <div class="meta-stat-label">Gastado</div>
-            <div class="meta-stat-value" id="metaGastado">S/. 0.00</div>
-          </div>
-          <div class="meta-stat">
-            <div class="meta-stat-label">Disponible</div>
-            <div class="meta-stat-value" id="metaDisponible">S/. 0.00</div>
-          </div>
-          <div class="meta-stat">
-            <div class="meta-stat-label">Días restantes</div>
-            <div class="meta-stat-value" id="metaDias">0</div>
-          </div>
-          <div class="meta-stat">
-            <div class="meta-stat-label">Promedio / día</div>
-            <div class="meta-stat-value" id="metaPromedio">S/. 0.00</div>
-          </div>
-          <div class="meta-stat">
-            <div class="meta-stat-label">Proyección</div>
-            <div class="meta-stat-value" id="metaProyeccion">S/. 0.00</div>
-          </div>
-          <div class="meta-stat" id="metaRitmoStat" style="display:none">
-            <div class="meta-stat-label">Ritmo vs ideal</div>
-            <div class="meta-stat-value" id="metaRitmo" style="font-size:13px">—</div>
-          </div>
-        </div>
+<div class="meta-inline-alerts" id="alertsContent" style="display:none"></div>
+<div class="meta-pos-msg" id="metaPosMsg" style="display:none"></div>
+<div id="metaGaugeSection">
+<div class="meta-gauge">
+<div class="gauge-container">
+<div class="gauge-pace-marker" id="gaugePaceMarker" style="display:none"></div>
+<div aria-label="Porcentaje del presupuesto gastado" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="gauge-bar" id="gaugeBar" role="progressbar">
+<div class="gauge-fill" id="gaugeFill"></div>
+</div>
+<div class="gauge-markers">
+<span class="marker-0">0%</span>
+<span class="marker-70">70%</span>
+<span class="marker-100">100%</span>
+</div>
+</div>
+<div class="gauge-pct-chip" id="gaugePctLabel">
+<span class="gauge-pct-emoji">●</span>
+<span class="gauge-pct-number">0%</span>
+<span class="gauge-pct-sub">del presupuesto</span>
+</div>
+</div>
+<div class="meta-stats" id="metaStatsSection">
+<div class="meta-stat">
+<div class="meta-stat-label">Presupuesto</div>
+<div class="meta-stat-value" id="metaValor">S/. 0.00</div>
+</div>
+<div class="meta-stat">
+<div class="meta-stat-label">Gastado</div>
+<div class="meta-stat-value" id="metaGastado">S/. 0.00</div>
+</div>
+<div class="meta-stat">
+<div class="meta-stat-label">Disponible</div>
+<div class="meta-stat-value" id="metaDisponible">S/. 0.00</div>
+</div>
+<div class="meta-stat">
+<div class="meta-stat-label">Días restantes</div>
+<div class="meta-stat-value" id="metaDias">0</div>
+</div>
+<div class="meta-stat">
+<div class="meta-stat-label">Promedio / día</div>
+<div class="meta-stat-value" id="metaPromedio">S/. 0.00</div>
+</div>
+<div class="meta-stat">
+<div class="meta-stat-label">Proyección</div>
+<div class="meta-stat-value" id="metaProyeccion">S/. 0.00</div>
+</div>
+<div class="meta-stat" id="metaRitmoStat" style="display:none">
+<div class="meta-stat-label">Ritmo vs ideal</div>
+<div class="meta-stat-value" id="metaRitmo" style="font-size:13px">—</div>
+</div>
+</div>
+</div><!-- /metaGaugeSection -->
+<!-- Historial mensual de presupuesto -->
+<div id="metaBudgetHistorySection" style="display:none">
+<hr class="meta-history-divider"/>
+<div class="meta-history-title">Historial de presupuesto por mes</div>
+<div class="meta-history-grid" id="metaBudgetHistoryGrid"></div>
+<div class="meta-history-summary" id="metaBudgetHistorySummary" style="display:none"></div>
+</div>
+</section>
+<section class="kpi-row">
+<div class="kpi-card kpi-green" id="kpiIngresos">
+<div class="kpi-title">💹 Ingresos</div>
+<div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
+<div class="kpi-trend neutral" id="trendIngresos"></div>
+</div>
+<div class="kpi-card kpi-red" id="kpiEgresos">
+<div class="kpi-title">💸 Egresos</div>
+<div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
+<div class="kpi-trend neutral" id="trendEgresos"></div>
+</div>
+<div class="kpi-card kpi-balance" id="kpiBalance">
+<div class="kpi-title">⚖ Balance Total</div>
+<div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
+<div class="kpi-trend neutral" id="trendBalance"></div>
+</div>
+<div class="kpi-card kpi-blue" id="kpiGastoDiario">
+<div class="kpi-title">📊 Promedio Diario
+            <button aria-label="Información: Promedio Diario" class="kpi-info-btn" tabindex="0">i
+              <span class="kpi-info-tooltip"><span class="tip-label">Qué mide</span>Gasto promedio por día activo del periodo.<br/><span class="tip-label">Cálculo</span>Egresos totales ÷ días con gastos.<br/><span class="tip-label">Uso</span>Sirve para detectar si el gasto diario está subiendo o bajando.</span>
+</button>
+</div>
+<div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
+<div class="kpi-trend neutral" id="trendGastoDiario"></div>
+</div>
+<div class="kpi-card kpi-orange" id="kpiAhorro">
+<div class="kpi-title">📈 Ratio Ahorro
+            <button aria-label="Información: Ratio Ahorro" class="kpi-info-btn" tabindex="0">i
+              <span class="kpi-info-tooltip"><span class="tip-label">Qué mide</span>Porcentaje de ingresos que queda disponible tras cubrir egresos.<br/><span class="tip-label">Cálculo</span>(Ingresos - Egresos) ÷ Ingresos × 100.<br/><span class="tip-label">Uso</span>Mientras más alto, mejor capacidad de ahorro y control financiero.</span>
+</button>
+</div>
+<div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
+<div class="kpi-trend neutral" id="trendAhorro"></div>
+</div>
+<div class="kpi-card kpi-blue" id="kpiTasaGasto" style="display:none">
+<div class="kpi-title">📉 Tasa de Gasto
+            <button aria-label="Información: Tasa de Gasto" class="kpi-info-btn" tabindex="0">i
+              <span class="kpi-info-tooltip"><span class="tip-label">Qu? mide</span>Qu? proporci?n de tus ingresos se va en gastos.<br/><span class="tip-label">C?lculo</span>Egresos ? Ingresos ? 100.<br/><span class="tip-label">Uso</span>Ayuda a ver si el gasto est? consumiendo demasiada parte de los ingresos.</span>
+</button>
+</div>
+<div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
+</div>
+<div class="kpi-card kpi-red" id="kpiTopCategoria">
+<div class="kpi-title">🏷 Top Categoría
+            <button aria-label="Información: Top Categoría" class="kpi-info-btn" tabindex="0">i
+              <span class="kpi-info-tooltip"><span class="tip-label">Qué mide</span>La categoría con mayor egreso acumulado del periodo.<br/><span class="tip-label">Interpretación</span>Te ayuda a identificar dónde se concentra el gasto principal.<br/><span class="tip-label">Uso</span>Es el mejor punto de partida para revisar recortes o ajustes.</span>
+</button>
+</div>
+<div class="kpi-value" data-field="value" style="font-size:16px"><span class="skeleton kpi-skeleton"></span></div>
+<div id="kpiTopCategoriaLabel" style="font-size:11px;color:#9EAFC2;margin-top:2px"></div>
+</div>
+</section>
+</div>
+<div class="dashboard-view" id="forecastView">
+<section class="forecast-panel" id="forecastPanel">
+<div class="forecast-header">
+<div>
+<div class="forecast-title">Vista Predictiva</div>
+<div class="forecast-subtitle">Estimación del cierre del año basada en el ritmo mensual de ingresos y egresos. Define una meta de ahorro para convertir la proyección en un plan mensual concreto.</div>
+</div>
+<div class="forecast-header-badges">
+<div class="forecast-trend stable" id="forecastTrendBadge">Tendencia estable</div>
+<div class="forecast-confidence-note" id="forecastConfidenceBadge">Calculando…</div>
+</div>
+</div>
+<div class="forecast-basis" id="forecastBasis">Esperando datos para calcular la tendencia anual.</div>
+<!-- -- Selector de tipo de trabajador -- -->
+<div class="fp-profile-bar" id="fpProfileBar">
+<div class="fp-profile-header">
+<span class="fp-profile-lbl">¿Cómo recibes tus ingresos?</span>
+<span class="fp-profile-hint">Personaliza la proyecci?n a tu situaci?n laboral</span>
+</div>
+<div class="fp-type-tabs">
+<button class="fp-tab fp-tab-active" id="fpTabIndep" onclick="setWorkerType('independiente')">
+<strong>Variable / Independiente</strong>
+<span>Proyecci?n basada en tu historial de movimientos registrados</span>
+</button>
+<button class="fp-tab" id="fpTabDep" onclick="setWorkerType('dependiente')">
+<strong>Fijo / En planilla</strong>
+<span>Proyecci?n seg?n leyes laborales peruanas: gratificaciones, CTS y AFP/ONP</span>
+</button>
+</div>
+</div>
+<!-- Contenido modo independiente (historial) -->
+<div id="fpIndepContent">
+<div class="forecast-grid">
+<div class="forecast-stat">
+<div class="forecast-stat-label">Ahorro neto acumulado hoy</div>
+<div class="forecast-stat-value" id="forecastActualYtd">S/. 0.00</div>
+<div class="forecast-stat-foot" id="forecastActualFoot">Lo que ya construiste este año con tus movimientos reales.</div>
+</div>
+<div class="forecast-stat">
+<div class="forecast-stat-label">Cierre anual proyectado</div>
+<div class="forecast-stat-value" id="forecastYearEnd">S/. 0.00</div>
+<div class="forecast-stat-foot" id="forecastYearEndFoot">Proyecci?n si mantienes el ritmo actual.</div>
+</div>
+<div class="forecast-stat">
+<div class="forecast-stat-label">Ahorro neto promedio mensual</div>
+<div class="forecast-stat-value" id="forecastAvgBalance">S/. 0.00</div>
+<div class="forecast-stat-foot" id="forecastAvgFoot">Tu ingreso mensual de referencia menos tu egreso mensual de referencia.</div>
+</div>
+<div class="forecast-stat">
+<div class="forecast-stat-label">Tasa de ahorro</div>
+<div class="forecast-stat-value" id="forecastSavingsRateStat">0%</div>
+<div class="forecast-stat-foot" id="forecastSavingsRateFoot">Del ingreso mensual estimado queda como balance neto.</div>
+</div>
+</div>
+<section aria-label="Tendencia mensual proyectada" class="forecast-chart-card">
+<div class="forecast-chart-head">
+<div>
+<div class="forecast-chart-title">Líneas mensuales de ingresos y egresos</div>
+<div class="forecast-chart-subtitle" id="forecastChartSubtitle">Compara lo ya ocurrido este año con la parte proyectada del resto de meses. La línea punteada arranca donde termina tu tramo real.</div>
+</div>
+</div>
+<div class="chart-container">
+<div class="chart-canvas" id="chartForecastTrend"></div>
+<div class="chart-empty-overlay" id="emptyForecastTrend">
+<span class="chart-empty-icon">📉</span>
+<span class="chart-empty-text">Sin datos suficientes para dibujar la tendencia mensual.</span>
+</div>
+</div>
+</section>
+<div class="forecast-goal-box">
+<div class="forecast-goal-header">
+<div>
+<div class="forecast-goal-label">¿Con cuánto dinero te gustaría cerrar el año?</div>
+<div class="forecast-goal-hint">Coloca tu objetivo de cierre y te diremos cuánto ya llevas acumulado, cuánto te falta y cuál sería un presupuesto mensual amable y realista para llegar.</div>
+</div>
+<div class="forecast-goal-controls">
+<input aria-label="Meta de balance neto al cierre del año" class="forecast-target-input" id="forecastTargetInput" inputmode="decimal" placeholder="Ej. 12,000" type="text"/>
+<button class="forecast-target-clear" id="forecastTargetClear" type="button">Limpiar meta</button>
+</div>
+</div>
+<div class="forecast-goal-summary" id="forecastGoalSummary">Ingresa una meta para ver cuánto ahorro neto mensual necesitarías desde ahora hasta diciembre y cuánto podrías presupuestar cada mes.</div>
+<div class="forecast-spend-visual" id="forecastSpendVisual">
+<div class="forecast-spend-head">
+<div class="forecast-spend-title">Tu ingreso mensual estimado se reparte as?</div>
+<div class="forecast-spend-income" id="forecastSpendIncomeLabel">Ingreso de referencia: S/. 0.00</div>
+</div>
+<div aria-hidden="true" class="forecast-spend-bar">
+<div class="forecast-spend-segment save" id="forecastSpendSaveBar" style="width:0%"></div>
+<div class="forecast-spend-segment spend" id="forecastSpendSpendBar" style="width:0%"></div>
+</div>
+<div class="forecast-spend-breakdown">
+<div class="forecast-spend-stat">
+<span>Guardar por mes</span>
+<strong id="forecastSpendSaveValue">S/. 0.00</strong>
+</div>
+<div class="forecast-spend-stat">
+<span>Gastar por mes</span>
+<strong id="forecastSpendSpendValue">S/. 0.00</strong>
+</div>
+</div>
+<div class="forecast-spend-hint" id="forecastSpendHint">Cuando definas una meta, esta barra te mostrará cuánto de tu ingreso mensual debería ir a ahorro y cuánto podrías gastar.</div>
+</div>
+<div class="forecast-plan-grid" id="forecastPlanGrid">
+<div class="forecast-plan-item">
+<div class="forecast-plan-label">Ahorro acumulado</div>
+<div class="forecast-plan-value" id="forecastSavedValue">S/. 0.00</div>
+<div class="forecast-plan-foot" id="forecastSavedFoot">Tu avance real hasta hoy.</div>
+</div>
+<div class="forecast-plan-item">
+<div class="forecast-plan-label">Meta pendiente</div>
+<div class="forecast-plan-value" id="forecastGapValue">S/. 0.00</div>
+<div class="forecast-plan-foot" id="forecastGapFoot">Lo que faltaría para alcanzar tu objetivo.</div>
+</div>
+<div class="forecast-plan-item">
+<div class="forecast-plan-label">Ahorro neto requerido</div>
+<div class="forecast-plan-value" id="forecastRequiredValue">S/. 0.00</div>
+<div class="forecast-plan-foot" id="forecastRequiredFoot">Balance neto necesario por cada cierre restante.</div>
+</div>
+<div class="forecast-plan-item" id="forecastBudgetPlanItem">
+<div class="forecast-plan-label">Puedes gastar hasta</div>
+<div class="forecast-plan-value" id="forecastBudgetValue">S/. 0.00</div>
+<div class="forecast-plan-foot" id="forecastBudgetFoot">Tu tope mensual de gasto para llegar al objetivo.</div>
+</div>
+</div>
+</div>
+</div><!-- /fpIndepContent -->
+<!-- -- Panel: Trabajador en planilla -- -->
+<div class="fp-dep-panel" id="fpDepPanel" style="display:none">
+<!-- Inputs -->
+<div class="fp-dep-form-row">
+<div class="fp-dep-field">
+<label>Sueldo bruto mensual (S/.)</label>
+<input autocomplete="off" id="fpGrossSalary" inputmode="decimal" placeholder="Ej. 3,500" type="text"/>
+</div>
+<div class="fp-dep-field">
+<label>Sistema pensionario</label>
+<select id="fpPensionSystem" onchange="onDepInputChange()">
+<option value="afp_integra">AFP Integra (~12.7%)</option>
+<option value="afp_habitat">AFP Habitat (~12.6%)</option>
+<option value="afp_prima">AFP Prima (~12.9%)</option>
+<option value="afp_profuturo">AFP Profuturo (~13.2%)</option>
+<option value="onp">ONP (13.0%)</option>
+</select>
+</div>
+</div>
+<!-- Estado vac?o -->
+<div id="fpDepEmpty">
+<div class="forecast-empty">Ingresa tu sueldo bruto para ver tu proyecci?n de ingresos anuales y planificar tu ahorro.</div>
+</div>
+<!-- Resultados (se muestra cuando hay un sueldo ingresado) -->
+<div id="fpDepResults" style="display:none">
+<!-- 4 stats -->
+<div class="fp-dep-stats">
+<div class="fp-dep-stat">
+<div class="fp-dep-stat-label">Sueldo neto mensual</div>
+<div class="fp-dep-stat-value" id="fpNetSalary">S/. 0.00</div>
+<div class="fp-dep-stat-foot" id="fpNetSalaryFoot">Luego de AFP/ONP e IR 5ta cat.</div>
+</div>
+<div class="fp-dep-stat">
+<div class="fp-dep-stat-label">Gratificaci?n (c/u)</div>
+<div class="fp-dep-stat-value" id="fpGratif">S/. 0.00</div>
+<div class="fp-dep-stat-foot">Julio (Fiestas Patrias) y diciembre (Navidad)</div>
+</div>
+<div class="fp-dep-stat">
+<div class="fp-dep-stat-label">CTS semestral</div>
+<div class="fp-dep-stat-value" id="fpCTS">S/. 0.00</div>
+<div class="fp-dep-stat-foot">Mayo y noviembre ? libre disponibilidad parcial</div>
+</div>
+<div class="fp-dep-stat">
+<div class="fp-dep-stat-label">Ingreso anual estimado</div>
+<div class="fp-dep-stat-value" id="fpAnnualTotal">S/. 0.00</div>
+<div class="fp-dep-stat-foot">12 sueldos netos + 2 grat. + 2 CTS</div>
+</div>
+</div>
+<!-- Desglose de boleta -->
+<div class="fp-breakdown">
+<div class="fp-breakdown-title">Descuentos de tu boleta mensual</div>
+<div class="fp-breakdown-row">
+<span>Sueldo bruto mensual</span>
+<span id="fpBkGross">?</span>
+</div>
+<div class="fp-breakdown-row">
+<span id="fpBkPensionLabel">AFP / ONP</span>
+<span class="fp-neg" id="fpBkPensionAmt">?</span>
+</div>
+<div class="fp-breakdown-row">
+<span>Retención IR 5ta categoría (est.)</span>
+<span class="fp-neg" id="fpBkIRAmt">?</span>
+</div>
+<div class="fp-breakdown-row fp-breakdown-total">
+<span>Sueldo neto en cuenta</span>
+<span class="fp-pos" id="fpBkNetAmt">?</span>
+</div>
+</div>
+<!-- ¿Ya recibiste los pagos de este mes? -->
+<div class="fp-received-card" id="fpReceivedCard">
+<div class="fp-received-title">¿Ya recibiste los pagos de <span id="fpReceivedMonthName">este mes</span>?</div>
+<div class="fp-received-hint">Marca lo que ya depositaron en tu cuenta para que la proyección sea exacta.</div>
+<div class="fp-received-checks" id="fpReceivedChecks"></div>
+</div>
+<!-- Gr?fico de perfil de ingresos anuales -->
+<section aria-label="Perfil de ingresos anuales" class="forecast-chart-card" style="margin-top:14px">
+<div class="forecast-chart-head">
+<div>
+<div class="forecast-chart-title">Perfil de ingresos anuales y gastos</div>
+<div class="forecast-chart-subtitle" id="fpDepChartLegend">
+<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="display:inline-block;width:18px;height:3px;background:#059669;border-radius:2px"></span>Ingreso cobrado</span>
+<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="display:inline-block;width:18px;height:3px;background:#6366F1;border-radius:2px;opacity:0.8"></span>Ingreso proyectado</span>
+<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="display:inline-block;width:18px;height:3px;background:#EA580C;border-radius:2px"></span>Gasto real</span>
+<span id="fpDepChartLegendBudgetItem" style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="display:inline-block;width:18px;height:3px;background:#F59E0B;border-radius:2px;border-top:2px dashed #F59E0B"></span><span id="fpDepChartLegendBudgetLabel">Gasto proyectado</span></span>
+<span style="display:inline-flex;align-items:center;gap:4px;margin-right:6px"><span style="color:#059669;font-weight:700;font-size:13px">★</span> Gratif.</span>
+<span style="display:inline-flex;align-items:center;gap:4px"><span style="color:#4F46E5;font-weight:700;font-size:13px">■</span> CTS</span>
+</div>
+</div>
+</div>
+<div class="chart-container">
+<div class="chart-canvas" id="chartDepSalary"></div>
+</div>
+</section>
+<!-- Contador de ahorro real ? prominente, justo bajo el gr?fico -->
+<div class="fp-dep-savings-card" id="fpDepSavingsCounter" style="display:none">
+<!-- Header: t?tulo + chip de modo activo -->
+<div class="fp-dep-savings-title-row">
+<span class="fp-dep-savings-title">Tu año en <span id="fpDepSavingsYear">2026</span></span>
+<span class="fp-dep-savings-mode-chip" id="fpDepSavingsModeChip">Desde hoy</span>
+</div>
+<!-- Dual: ahorrado hasta hoy ? proyecci?n -->
+<div class="fp-dep-savings-dual">
+<div class="fp-dep-savings-col">
+<div class="fp-dep-savings-col-label">Ahorrado hasta hoy</div>
+<div class="fp-dep-savings-main" id="fpDepYtdSave">—</div>
+</div>
+<div class="fp-dep-savings-divider">→</div>
+<div class="fp-dep-savings-col">
+<div class="fp-dep-savings-col-label" id="fpDepYearEndColLabel">Proyección al 31 dic</div>
+<div class="fp-dep-savings-proj" id="fpDepYearEndValue">—</div>
+<div class="fp-dep-savings-proj-sub" id="fpDepYearEndSub"></div>
+</div>
+</div>
+<!-- Barra de progreso de 2 capas: verde = ya tienes, ?ndigo = plan -->
+<div class="fp-dep-savings-bar-track">
+<div class="fp-dep-savings-bar-fill" id="fpDepSavingsBarFill" style="width:0%"></div>
+<div class="fp-dep-savings-bar-plan" id="fpDepSavingsBarPlan" style="left:0%;width:0%"></div>
+</div>
+<div class="fp-dep-savings-bar-legend">
+<span id="fpDepSavingsPct" style="color:#059669">—</span>
+<span id="fpDepSavingsGoalLabel" style="color:var(--text-secondary)">—</span>
+</div>
+<div class="fp-dep-savings-kv-row">
+<div class="fp-dep-savings-kv"><span>Ingresos registrados</span><strong id="fpDepYtdIncome">—</strong></div>
+<div class="fp-dep-savings-kv"><span>Egresos registrados</span><strong id="fpDepYtdExpense">—</strong></div>
+</div>
+<div class="fp-hist-title" id="fpDepHistTitle" style="display:none">Historial por año</div>
+<div class="fp-hist-grid" id="fpDepHistGrid"></div>
+</div>
+<!-- Meta de ahorro -->
+<div class="fp-dep-goal">
+<div class="fp-dep-goal-header">
+<div style="flex:1;min-width:0">
+<div class="fp-dep-goal-title" id="fpDepGoalTitle">Meta de ahorro desde hoy</div>
+<div class="fp-dep-goal-hint" id="fpDepGoalHint">Cuánto quieres ahorrar MÁS de aquí a diciembre. El sistema ajusta tu límite de gasto mensual para que llegues.</div>
+<!-- Toggle: c?mo interpreta el usuario su meta -->
+<div class="fp-goal-mode-row">
+<button class="fp-goal-mode-btn fp-goal-mode-active" id="fpGoalModeExtraBtn" onclick="setDepGoalMode('extra')" type="button">Desde hoy a dic.</button>
+<button class="fp-goal-mode-btn" id="fpGoalModeTotalBtn" onclick="setDepGoalMode('total')" type="button">Total del año</button>
+</div>
+</div>
+<div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+<input class="forecast-target-input" id="fpDepGoalInput" inputmode="decimal" placeholder="Ej. 15,000" style="width:140px" type="text"/>
+<button class="forecast-target-clear" onclick="clearDepGoal()" style="white-space:nowrap" type="button">Limpiar</button>
+</div>
+</div>
+<div class="fp-dep-goal-summary" id="fpDepGoalSummary">Ingresa tu meta de ahorro para ver cuánto puedes gastar por mes.</div>
+<!-- Tarjetas KPI ? siempre visibles una vez calculado el perfil -->
+<div class="fp-dep-goal-grid">
+<div class="fp-dep-goal-item fp-dep-goal-item-ytd">
+<div class="fp-dep-goal-label" id="fpKpiTopLabel">Proyección al 31 dic</div>
+<div class="fp-dep-goal-value" id="fpYtdSavingsKpi" style="color:var(--text-primary)">—</div>
+<div class="fp-dep-goal-foot" id="fpYtdSavingsKpiFoot">Carga el dashboard para ver</div>
+</div>
+<div class="fp-dep-goal-item">
+<div class="fp-dep-goal-label">Ingreso restante en el año</div>
+<div class="fp-dep-goal-value" id="fpRemainingIncome">S/. 0.00</div>
+<div class="fp-dep-goal-foot">De este mes a diciembre, con todos los beneficios</div>
+</div>
+<div class="fp-dep-goal-item fp-dep-goal-item-spend">
+<div class="fp-dep-goal-label">Puedes gastar al mes</div>
+<div class="fp-dep-goal-value" id="fpSpendBudget">—</div>
+<div class="fp-dep-goal-foot" id="fpSpendBudgetFoot">Define tu meta para calcularlo</div>
+</div>
+<div class="fp-dep-goal-item fp-dep-goal-item-save">
+<div class="fp-dep-goal-label" id="fpSavingTargetLabel">Meta de ahorro</div>
+<div class="fp-dep-goal-value" id="fpSavingTarget">—</div>
+<div class="fp-dep-goal-foot" id="fpSavingTargetFoot">Al 31 de diciembre</div>
+</div>
+</div>
+<!-- Plan autom?tico ? aparece al definir meta, debajo de las tarjetas -->
+<div class="fp-dep-plan" id="fpDepPlanVisual" style="display:none">
+<div class="fp-dep-plan-hero">
+<div class="fp-dep-plan-hero-label">Límite de gasto mensual</div>
+<div class="fp-dep-plan-hero-value" id="fpPlanHeroValue">—</div>
+<div class="fp-dep-plan-hero-sub">Respeta este monto y tus ingresos harán el resto automáticamente</div>
+</div>
+<div class="fp-dep-plan-how">
+<div class="fp-dep-plan-how-title">Cómo se acumula tu ahorro</div>
+<div class="fp-dep-plan-table" id="fpDepPlanTable"></div>
+</div>
+</div>
+<div class="fp-dep-goal-note" id="fpDepGoalNote" style="display:none"></div>
+</div>
+</div><!-- /fpDepResults -->
+</div><!-- /fpDepPanel -->
+</section>
+</div>
+<section class="grid" id="descriptiveChartsView">
+<div class="chart-card" id="chart-evolucion">
+<div class="chart-title">📈 Evolución de Ingresos y Egresos</div>
+<div class="chart-subtitle">Compara la trayectoria diaria para detectar cambios bruscos, tendencia general y picos de gasto.</div>
+<div class="chart-container">
+<div class="chart-canvas" id="chartEvolucionCanvas"></div>
+<div class="chart-empty-overlay" id="emptyEvolucion">
+<span class="chart-empty-icon">📈</span>
+<span class="chart-empty-text">Sin transacciones en este periodo</span>
+</div>
+</div>
+</div>
+<div class="chart-card" id="chart-distribucion">
+<div class="chart-title" id="titleDistribucion">🍰 Distribución de Gastos</div>
+<div class="chart-subtitle">Resume cómo se reparte el gasto por categoría y destaca dónde se concentra el presupuesto.</div>
+<div class="chart-container">
+<div class="chart-canvas" id="chartDistribucionCanvas"></div>
+<div class="chart-empty-overlay" id="emptyDistribucion">
+<span class="chart-empty-icon">🍰</span>
+<span class="chart-empty-text">Sin transacciones en este periodo</span>
+</div>
+</div>
+</div>
+<div class="chart-card" id="chart-medio-pago">
+<div class="chart-title" id="titleMedioPago">💳 Gasto por Medio de Pago</div>
+<div class="chart-subtitle">Muestra qué medio de pago usas más y ayuda a comparar intensidad de uso entre canales.</div>
+<div class="chart-scroll-wrapper">
+<div class="chart-container">
+<div class="chart-canvas" id="chartMedioPagoCanvas"></div>
+<div class="chart-empty-overlay" id="emptyMedioPago">
+<span class="chart-empty-icon">💳</span>
+<span class="chart-empty-text">Sin transacciones en este periodo</span>
+</div>
+</div>
+</div>
+</div>
+<div class="chart-card" id="chart-cierre-caja">
+<div class="chart-title chart-title-clean">🧾 Cierre de Caja por Mes</div>
+<div class="chart-subtitle">Resume el cierre mensual para entender el resultado neto y detectar meses más débiles.</div>
+<div class="chart-scroll-wrapper">
+<div class="chart-container">
+<div class="chart-canvas" id="chartCierreCajaCanvas"></div>
+<div class="chart-empty-overlay" id="emptyCierreCaja">
+<span class="chart-empty-icon">🧾</span>
+<span class="chart-empty-text">Sin transacciones en este periodo</span>
+</div>
+</div>
+</div>
+</div>
+<div class="chart-card" id="chart-ing-vs-egr-mes">
+<div class="chart-title chart-title-clean">⚖ Ingresos vs Egresos por Mes</div>
+<div class="chart-subtitle">Permite comparar entradas y salidas mes a mes para leer equilibrio o presi?n financiera.</div>
+<div class="chart-scroll-wrapper">
+<div class="chart-container">
+<div class="chart-canvas" id="chartIngVsEgrMesCanvas"></div>
+<div class="chart-empty-overlay" id="emptyIngVsEgr">
+<span class="chart-empty-icon">⚖</span>
+<span class="chart-empty-text">Sin transacciones en este periodo</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- [TX_TABLE] Tabla de Transacciones con cross-filtering -->
+<!-- Tooltip flotante de detalle -->
+<div id="txTooltip"></div>
+<section class="tx-section" id="txSection">
+<div class="tx-header">
+<div>
+<div class="tx-title">🧾 Detalle de Transacciones</div>
+<div class="tx-subtitle">Pasa el cursor para ver el detalle y haz click en un gráfico para filtrar esta tabla</div>
+</div>
+<div class="tx-controls">
+<input aria-label="Buscar en transacciones" id="txSearchInput" placeholder="🔎 Buscar categoría, medio o comentario..." type="search"/>
+<span class="tx-count" id="txCount">0</span>
+<button aria-label="Exportar a CSV" id="btnExportCsv" title="Exportar tabla actual a CSV">⬇ CSV</button>
+</div>
+</div>
+<div aria-live="polite" class="tx-filter-indicator" id="txChartFilterIndicator">
+<span class="tx-filter-chip" id="txChartFilterLabel"></span>
+<button class="tx-filter-clear" id="btnClearTxChartFilter" type="button">Quitar filtro del gráfico</button>
+</div>
+<div class="tx-scroll">
+<table class="tx-table">
+<thead>
+<tr>
+<th class="tx-sortable tx-sort-active" data-sort="fecha">Fecha <span class="tx-sort-icon">↕</span></th>
+<th>Tipo</th>
+<th class="tx-sortable" data-sort="categoria">Categoría <span class="tx-sort-icon">↕</span></th>
+<th class="tx-sortable tx-right" data-sort="valorNum">Valor <span class="tx-sort-icon">↕</span></th>
+<th class="tx-sortable" data-sort="medio">Medio de Pago <span class="tx-sort-icon">↕</span></th>
+<th>Comentario</th>
+</tr>
+</thead>
+<tbody id="txBody">
+<tr><td class="tx-empty" colspan="6">Cargando datos...</td></tr>
+</tbody>
+</table>
+</div>
+<div class="tx-pagination" id="txPagination" style="display:none">
+<button aria-label="Página anterior" class="tx-page-btn" id="txPrevBtn">← Anterior</button>
+<span class="tx-page-info" id="txPageInfo">Pág. 1 / 1</span>
+<button aria-label="Siguiente página" class="tx-page-btn" id="txNextBtn">Siguiente →</button>
+<span class="tx-page-size-info" id="txPageSizeInfo"></span>
+</div>
+</section>
+<div class="footer">
+<div id="lastUpdate">Última actualización: Esperando datos...</div>
+</div>
+</main>
+<button aria-label="Volver al inicio de la página" id="btnTop" title="Volver arriba (Alt+T)">⇧</button>
 
-        </div><!-- /metaGaugeSection -->
 
-        <!-- Historial mensual de presupuesto -->
-        <div id="metaBudgetHistorySection" style="display:none">
-          <hr class="meta-history-divider">
-          <div class="meta-history-title">Historial de presupuesto por mes</div>
-          <div class="meta-history-grid" id="metaBudgetHistoryGrid"></div>
-          <div class="meta-history-summary" id="metaBudgetHistorySummary" style="display:none"></div>
-        </div>
-
-      </section>
-
-      <section class="kpi-row">
-        <div class="kpi-card kpi-green" id="kpiIngresos">
-          <div class="kpi-title">💹 Ingresos</div>
-          <div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
-          <div class="kpi-trend neutral" id="trendIngresos"></div>
-        </div>
-        <div class="kpi-card kpi-red" id="kpiEgresos">
-          <div class="kpi-title">💸 Egresos</div>
-          <div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
-          <div class="kpi-trend neutral" id="trendEgresos"></div>
-        </div>
-        <div class="kpi-card kpi-balance" id="kpiBalance">
-          <div class="kpi-title">⚖ Balance Total</div>
-          <div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
-          <div class="kpi-trend neutral" id="trendBalance"></div>
-        </div>
-        <div class="kpi-card kpi-blue" id="kpiGastoDiario">
-          <div class="kpi-title">📊 Promedio Diario
-            <button class="kpi-info-btn" tabindex="0" aria-label="Información: Promedio Diario">i
-              <span class="kpi-info-tooltip"><span class="tip-label">Qué mide</span>Gasto promedio por día activo del periodo.<br><span class="tip-label">Cálculo</span>Egresos totales ÷ días con gastos.<br><span class="tip-label">Uso</span>Sirve para detectar si el gasto diario está subiendo o bajando.</span>
-            </button>
-          </div>
-          <div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
-          <div class="kpi-trend neutral" id="trendGastoDiario"></div>
-        </div>
-        <div class="kpi-card kpi-orange" id="kpiAhorro">
-          <div class="kpi-title">📈 Ratio Ahorro
-            <button class="kpi-info-btn" tabindex="0" aria-label="Información: Ratio Ahorro">i
-              <span class="kpi-info-tooltip"><span class="tip-label">Qué mide</span>Porcentaje de ingresos que queda disponible tras cubrir egresos.<br><span class="tip-label">Cálculo</span>(Ingresos - Egresos) ÷ Ingresos × 100.<br><span class="tip-label">Uso</span>Mientras más alto, mejor capacidad de ahorro y control financiero.</span>
-            </button>
-          </div>
-          <div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
-          <div class="kpi-trend neutral" id="trendAhorro"></div>
-        </div>
-        <div class="kpi-card kpi-blue" id="kpiTasaGasto" style="display:none">
-          <div class="kpi-title">📉 Tasa de Gasto
-            <button class="kpi-info-btn" tabindex="0" aria-label="Información: Tasa de Gasto">i
-              <span class="kpi-info-tooltip"><span class="tip-label">Qu? mide</span>Qu? proporci?n de tus ingresos se va en gastos.<br><span class="tip-label">C?lculo</span>Egresos ? Ingresos ? 100.<br><span class="tip-label">Uso</span>Ayuda a ver si el gasto est? consumiendo demasiada parte de los ingresos.</span>
-            </button>
-          </div>
-          <div class="kpi-value" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
-        </div>
-        <div class="kpi-card kpi-red" id="kpiTopCategoria">
-          <div class="kpi-title">🏷 Top Categoría
-            <button class="kpi-info-btn" tabindex="0" aria-label="Información: Top Categoría">i
-              <span class="kpi-info-tooltip"><span class="tip-label">Qué mide</span>La categoría con mayor egreso acumulado del periodo.<br><span class="tip-label">Interpretación</span>Te ayuda a identificar dónde se concentra el gasto principal.<br><span class="tip-label">Uso</span>Es el mejor punto de partida para revisar recortes o ajustes.</span>
-            </button>
-          </div>
-          <div class="kpi-value" style="font-size:16px" data-field="value"><span class="skeleton kpi-skeleton"></span></div>
-          <div style="font-size:11px;color:#9EAFC2;margin-top:2px" id="kpiTopCategoriaLabel"></div>
-        </div>
-      </section>
-
-        </div>
-
-        <div id="forecastView" class="dashboard-view">
-
-      <section class="forecast-panel" id="forecastPanel">
-        <div class="forecast-header">
-          <div>
-            <div class="forecast-title">Vista Predictiva</div>
-            <div class="forecast-subtitle">Estimación del cierre del año basada en el ritmo mensual de ingresos y egresos. Define una meta de ahorro para convertir la proyección en un plan mensual concreto.</div>
-          </div>
-          <div class="forecast-header-badges">
-            <div class="forecast-trend stable" id="forecastTrendBadge">Tendencia estable</div>
-            <div class="forecast-confidence-note" id="forecastConfidenceBadge">Calculando…</div>
-          </div>
-        </div>
-        <div class="forecast-basis" id="forecastBasis">Esperando datos para calcular la tendencia anual.</div>
-
-        <!-- -- Selector de tipo de trabajador -- -->
-        <div class="fp-profile-bar" id="fpProfileBar">
-          <div class="fp-profile-header">
-            <span class="fp-profile-lbl">¿Cómo recibes tus ingresos?</span>
-            <span class="fp-profile-hint">Personaliza la proyecci?n a tu situaci?n laboral</span>
-          </div>
-          <div class="fp-type-tabs">
-            <button class="fp-tab fp-tab-active" id="fpTabIndep" onclick="setWorkerType('independiente')">
-              <strong>Variable / Independiente</strong>
-              <span>Proyecci?n basada en tu historial de movimientos registrados</span>
-            </button>
-            <button class="fp-tab" id="fpTabDep" onclick="setWorkerType('dependiente')">
-              <strong>Fijo / En planilla</strong>
-              <span>Proyecci?n seg?n leyes laborales peruanas: gratificaciones, CTS y AFP/ONP</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Contenido modo independiente (historial) -->
-        <div id="fpIndepContent">
-        <div class="forecast-grid">
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Ahorro neto acumulado hoy</div>
-            <div class="forecast-stat-value" id="forecastActualYtd">S/. 0.00</div>
-            <div class="forecast-stat-foot" id="forecastActualFoot">Lo que ya construiste este año con tus movimientos reales.</div>
-          </div>
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Cierre anual proyectado</div>
-            <div class="forecast-stat-value" id="forecastYearEnd">S/. 0.00</div>
-            <div class="forecast-stat-foot" id="forecastYearEndFoot">Proyecci?n si mantienes el ritmo actual.</div>
-          </div>
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Ahorro neto promedio mensual</div>
-            <div class="forecast-stat-value" id="forecastAvgBalance">S/. 0.00</div>
-            <div class="forecast-stat-foot" id="forecastAvgFoot">Tu ingreso mensual de referencia menos tu egreso mensual de referencia.</div>
-          </div>
-          <div class="forecast-stat">
-            <div class="forecast-stat-label">Tasa de ahorro</div>
-            <div class="forecast-stat-value" id="forecastSavingsRateStat">0%</div>
-            <div class="forecast-stat-foot" id="forecastSavingsRateFoot">Del ingreso mensual estimado queda como balance neto.</div>
-          </div>
-        </div>
-
-        <section class="forecast-chart-card" aria-label="Tendencia mensual proyectada">
-          <div class="forecast-chart-head">
-            <div>
-              <div class="forecast-chart-title">Líneas mensuales de ingresos y egresos</div>
-              <div class="forecast-chart-subtitle" id="forecastChartSubtitle">Compara lo ya ocurrido este año con la parte proyectada del resto de meses. La línea punteada arranca donde termina tu tramo real.</div>
-            </div>
-          </div>
-          <div class="chart-container">
-            <div id="chartForecastTrend" class="chart-canvas"></div>
-            <div class="chart-empty-overlay" id="emptyForecastTrend">
-              <span class="chart-empty-icon">📉</span>
-              <span class="chart-empty-text">Sin datos suficientes para dibujar la tendencia mensual.</span>
-            </div>
-          </div>
-        </section>
-
-        <div class="forecast-goal-box">
-          <div class="forecast-goal-header">
-            <div>
-              <div class="forecast-goal-label">¿Con cuánto dinero te gustaría cerrar el año?</div>
-              <div class="forecast-goal-hint">Coloca tu objetivo de cierre y te diremos cuánto ya llevas acumulado, cuánto te falta y cuál sería un presupuesto mensual amable y realista para llegar.</div>
-            </div>
-            <div class="forecast-goal-controls">
-              <input type="text" inputmode="decimal" id="forecastTargetInput" class="forecast-target-input" placeholder="Ej. 12,000" aria-label="Meta de balance neto al cierre del año" />
-              <button type="button" id="forecastTargetClear" class="forecast-target-clear">Limpiar meta</button>
-            </div>
-          </div>
-          <div class="forecast-goal-summary" id="forecastGoalSummary">Ingresa una meta para ver cuánto ahorro neto mensual necesitarías desde ahora hasta diciembre y cuánto podrías presupuestar cada mes.</div>
-          <div class="forecast-spend-visual" id="forecastSpendVisual">
-            <div class="forecast-spend-head">
-              <div class="forecast-spend-title">Tu ingreso mensual estimado se reparte as?</div>
-              <div class="forecast-spend-income" id="forecastSpendIncomeLabel">Ingreso de referencia: S/. 0.00</div>
-            </div>
-            <div class="forecast-spend-bar" aria-hidden="true">
-              <div class="forecast-spend-segment save" id="forecastSpendSaveBar" style="width:0%"></div>
-              <div class="forecast-spend-segment spend" id="forecastSpendSpendBar" style="width:0%"></div>
-            </div>
-            <div class="forecast-spend-breakdown">
-              <div class="forecast-spend-stat">
-                <span>Guardar por mes</span>
-                <strong id="forecastSpendSaveValue">S/. 0.00</strong>
-              </div>
-              <div class="forecast-spend-stat">
-                <span>Gastar por mes</span>
-                <strong id="forecastSpendSpendValue">S/. 0.00</strong>
-              </div>
-            </div>
-            <div class="forecast-spend-hint" id="forecastSpendHint">Cuando definas una meta, esta barra te mostrará cuánto de tu ingreso mensual debería ir a ahorro y cuánto podrías gastar.</div>
-          </div>
-          <div class="forecast-plan-grid" id="forecastPlanGrid">
-            <div class="forecast-plan-item">
-              <div class="forecast-plan-label">Ahorro acumulado</div>
-              <div class="forecast-plan-value" id="forecastSavedValue">S/. 0.00</div>
-              <div class="forecast-plan-foot" id="forecastSavedFoot">Tu avance real hasta hoy.</div>
-            </div>
-            <div class="forecast-plan-item">
-              <div class="forecast-plan-label">Meta pendiente</div>
-              <div class="forecast-plan-value" id="forecastGapValue">S/. 0.00</div>
-              <div class="forecast-plan-foot" id="forecastGapFoot">Lo que faltaría para alcanzar tu objetivo.</div>
-            </div>
-            <div class="forecast-plan-item">
-              <div class="forecast-plan-label">Ahorro neto requerido</div>
-              <div class="forecast-plan-value" id="forecastRequiredValue">S/. 0.00</div>
-              <div class="forecast-plan-foot" id="forecastRequiredFoot">Balance neto necesario por cada cierre restante.</div>
-            </div>
-            <div class="forecast-plan-item" id="forecastBudgetPlanItem">
-              <div class="forecast-plan-label">Puedes gastar hasta</div>
-              <div class="forecast-plan-value" id="forecastBudgetValue">S/. 0.00</div>
-              <div class="forecast-plan-foot" id="forecastBudgetFoot">Tu tope mensual de gasto para llegar al objetivo.</div>
-            </div>
-          </div>
-        </div>
-
-
-      </div><!-- /fpIndepContent -->
-
-      <!-- -- Panel: Trabajador en planilla -- -->
-      <div class="fp-dep-panel" id="fpDepPanel" style="display:none">
-
-        <!-- Inputs -->
-        <div class="fp-dep-form-row">
-          <div class="fp-dep-field">
-            <label>Sueldo bruto mensual (S/.)</label>
-            <input type="text" inputmode="decimal" id="fpGrossSalary" placeholder="Ej. 3,500" autocomplete="off" />
-          </div>
-          <div class="fp-dep-field">
-            <label>Sistema pensionario</label>
-            <select id="fpPensionSystem" onchange="onDepInputChange()">
-              <option value="afp_integra">AFP Integra (~12.7%)</option>
-              <option value="afp_habitat">AFP Habitat (~12.6%)</option>
-              <option value="afp_prima">AFP Prima (~12.9%)</option>
-              <option value="afp_profuturo">AFP Profuturo (~13.2%)</option>
-              <option value="onp">ONP (13.0%)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Estado vac?o -->
-        <div id="fpDepEmpty">
-          <div class="forecast-empty">Ingresa tu sueldo bruto para ver tu proyecci?n de ingresos anuales y planificar tu ahorro.</div>
-        </div>
-
-        <!-- Resultados (se muestra cuando hay un sueldo ingresado) -->
-        <div id="fpDepResults" style="display:none">
-
-          <!-- 4 stats -->
-          <div class="fp-dep-stats">
-            <div class="fp-dep-stat">
-              <div class="fp-dep-stat-label">Sueldo neto mensual</div>
-              <div class="fp-dep-stat-value" id="fpNetSalary">S/. 0.00</div>
-              <div class="fp-dep-stat-foot" id="fpNetSalaryFoot">Luego de AFP/ONP e IR 5ta cat.</div>
-            </div>
-            <div class="fp-dep-stat">
-              <div class="fp-dep-stat-label">Gratificaci?n (c/u)</div>
-              <div class="fp-dep-stat-value" id="fpGratif">S/. 0.00</div>
-              <div class="fp-dep-stat-foot">Julio (Fiestas Patrias) y diciembre (Navidad)</div>
-            </div>
-            <div class="fp-dep-stat">
-              <div class="fp-dep-stat-label">CTS semestral</div>
-              <div class="fp-dep-stat-value" id="fpCTS">S/. 0.00</div>
-              <div class="fp-dep-stat-foot">Mayo y noviembre ? libre disponibilidad parcial</div>
-            </div>
-            <div class="fp-dep-stat">
-              <div class="fp-dep-stat-label">Ingreso anual estimado</div>
-              <div class="fp-dep-stat-value" id="fpAnnualTotal">S/. 0.00</div>
-              <div class="fp-dep-stat-foot">12 sueldos netos + 2 grat. + 2 CTS</div>
-            </div>
-          </div>
-
-          <!-- Desglose de boleta -->
-          <div class="fp-breakdown">
-            <div class="fp-breakdown-title">Descuentos de tu boleta mensual</div>
-            <div class="fp-breakdown-row">
-              <span>Sueldo bruto mensual</span>
-              <span id="fpBkGross">?</span>
-            </div>
-            <div class="fp-breakdown-row">
-              <span id="fpBkPensionLabel">AFP / ONP</span>
-              <span class="fp-neg" id="fpBkPensionAmt">?</span>
-            </div>
-            <div class="fp-breakdown-row">
-              <span>Retención IR 5ta categoría (est.)</span>
-              <span class="fp-neg" id="fpBkIRAmt">?</span>
-            </div>
-            <div class="fp-breakdown-row fp-breakdown-total">
-              <span>Sueldo neto en cuenta</span>
-              <span class="fp-pos" id="fpBkNetAmt">?</span>
-            </div>
-          </div>
-
-          <!-- ¿Ya recibiste los pagos de este mes? -->
-          <div class="fp-received-card" id="fpReceivedCard">
-            <div class="fp-received-title">¿Ya recibiste los pagos de <span id="fpReceivedMonthName">este mes</span>?</div>
-            <div class="fp-received-hint">Marca lo que ya depositaron en tu cuenta para que la proyección sea exacta.</div>
-            <div class="fp-received-checks" id="fpReceivedChecks"></div>
-          </div>
-
-          <!-- Gr?fico de perfil de ingresos anuales -->
-          <section class="forecast-chart-card" aria-label="Perfil de ingresos anuales" style="margin-top:14px">
-            <div class="forecast-chart-head">
-              <div>
-                <div class="forecast-chart-title">Perfil de ingresos anuales y gastos</div>
-                <div class="forecast-chart-subtitle" id="fpDepChartLegend">
-                  <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="display:inline-block;width:18px;height:3px;background:#059669;border-radius:2px"></span>Ingreso cobrado</span>
-                  <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="display:inline-block;width:18px;height:3px;background:#6366F1;border-radius:2px;opacity:0.8"></span>Ingreso proyectado</span>
-                  <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="display:inline-block;width:18px;height:3px;background:#EA580C;border-radius:2px"></span>Gasto real</span>
-                  <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px" id="fpDepChartLegendBudgetItem"><span style="display:inline-block;width:18px;height:3px;background:#F59E0B;border-radius:2px;border-top:2px dashed #F59E0B"></span><span id="fpDepChartLegendBudgetLabel">Gasto proyectado</span></span>
-                  <span style="display:inline-flex;align-items:center;gap:4px;margin-right:6px"><span style="color:#059669;font-weight:700;font-size:13px">★</span>&nbsp;Gratif.</span>
-                  <span style="display:inline-flex;align-items:center;gap:4px"><span style="color:#4F46E5;font-weight:700;font-size:13px">■</span>&nbsp;CTS</span>
-                </div>
-              </div>
-            </div>
-            <div class="chart-container">
-              <div id="chartDepSalary" class="chart-canvas"></div>
-            </div>
-          </section>
-
-          <!-- Contador de ahorro real ? prominente, justo bajo el gr?fico -->
-          <div class="fp-dep-savings-card" id="fpDepSavingsCounter" style="display:none">
-            <!-- Header: t?tulo + chip de modo activo -->
-            <div class="fp-dep-savings-title-row">
-              <span class="fp-dep-savings-title">Tu año en <span id="fpDepSavingsYear">2026</span></span>
-              <span class="fp-dep-savings-mode-chip" id="fpDepSavingsModeChip">Desde hoy</span>
-            </div>
-            <!-- Dual: ahorrado hasta hoy ? proyecci?n -->
-            <div class="fp-dep-savings-dual">
-              <div class="fp-dep-savings-col">
-                <div class="fp-dep-savings-col-label">Ahorrado hasta hoy</div>
-                <div class="fp-dep-savings-main" id="fpDepYtdSave">—</div>
-              </div>
-              <div class="fp-dep-savings-divider">→</div>
-              <div class="fp-dep-savings-col">
-                <div class="fp-dep-savings-col-label" id="fpDepYearEndColLabel">Proyección al 31 dic</div>
-                <div class="fp-dep-savings-proj" id="fpDepYearEndValue">—</div>
-                <div class="fp-dep-savings-proj-sub" id="fpDepYearEndSub"></div>
-              </div>
-            </div>
-            <!-- Barra de progreso de 2 capas: verde = ya tienes, ?ndigo = plan -->
-            <div class="fp-dep-savings-bar-track">
-              <div id="fpDepSavingsBarFill" class="fp-dep-savings-bar-fill" style="width:0%"></div>
-              <div id="fpDepSavingsBarPlan" class="fp-dep-savings-bar-plan" style="left:0%;width:0%"></div>
-            </div>
-            <div class="fp-dep-savings-bar-legend">
-              <span id="fpDepSavingsPct" style="color:#059669">—</span>
-              <span id="fpDepSavingsGoalLabel" style="color:var(--text-secondary)">—</span>
-            </div>
-            <div class="fp-dep-savings-kv-row">
-              <div class="fp-dep-savings-kv"><span>Ingresos registrados</span><strong id="fpDepYtdIncome">—</strong></div>
-              <div class="fp-dep-savings-kv"><span>Egresos registrados</span><strong id="fpDepYtdExpense">—</strong></div>
-            </div>
-            <div class="fp-hist-title" id="fpDepHistTitle" style="display:none">Historial por año</div>
-            <div class="fp-hist-grid" id="fpDepHistGrid"></div>
-          </div>
-
-          <!-- Meta de ahorro -->
-          <div class="fp-dep-goal">
-            <div class="fp-dep-goal-header">
-              <div style="flex:1;min-width:0">
-                <div class="fp-dep-goal-title" id="fpDepGoalTitle">Meta de ahorro desde hoy</div>
-                <div class="fp-dep-goal-hint" id="fpDepGoalHint">Cuánto quieres ahorrar MÁS de aquí a diciembre. El sistema ajusta tu límite de gasto mensual para que llegues.</div>
-                <!-- Toggle: c?mo interpreta el usuario su meta -->
-                <div class="fp-goal-mode-row">
-                  <button type="button" id="fpGoalModeExtraBtn" class="fp-goal-mode-btn fp-goal-mode-active" onclick="setDepGoalMode('extra')">Desde hoy a dic.</button>
-                  <button type="button" id="fpGoalModeTotalBtn" class="fp-goal-mode-btn" onclick="setDepGoalMode('total')">Total del año</button>
-                </div>
-              </div>
-              <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
-                <input type="text" inputmode="decimal" id="fpDepGoalInput" class="forecast-target-input" placeholder="Ej. 15,000" style="width:140px" />
-                <button type="button" onclick="clearDepGoal()" class="forecast-target-clear" style="white-space:nowrap">Limpiar</button>
-              </div>
-            </div>
-            <div class="fp-dep-goal-summary" id="fpDepGoalSummary">Ingresa tu meta de ahorro para ver cuánto puedes gastar por mes.</div>
-
-            <!-- Tarjetas KPI ? siempre visibles una vez calculado el perfil -->
-            <div class="fp-dep-goal-grid">
-              <div class="fp-dep-goal-item fp-dep-goal-item-ytd">
-                <div class="fp-dep-goal-label" id="fpKpiTopLabel">Proyección al 31 dic</div>
-                <div class="fp-dep-goal-value" id="fpYtdSavingsKpi" style="color:var(--text-primary)">—</div>
-                <div class="fp-dep-goal-foot" id="fpYtdSavingsKpiFoot">Carga el dashboard para ver</div>
-              </div>
-              <div class="fp-dep-goal-item">
-                <div class="fp-dep-goal-label">Ingreso restante en el año</div>
-                <div class="fp-dep-goal-value" id="fpRemainingIncome">S/. 0.00</div>
-                <div class="fp-dep-goal-foot">De este mes a diciembre, con todos los beneficios</div>
-              </div>
-              <div class="fp-dep-goal-item fp-dep-goal-item-spend">
-                <div class="fp-dep-goal-label">Puedes gastar al mes</div>
-                <div class="fp-dep-goal-value" id="fpSpendBudget">—</div>
-                <div class="fp-dep-goal-foot" id="fpSpendBudgetFoot">Define tu meta para calcularlo</div>
-              </div>
-              <div class="fp-dep-goal-item fp-dep-goal-item-save">
-                <div class="fp-dep-goal-label" id="fpSavingTargetLabel">Meta de ahorro</div>
-                <div class="fp-dep-goal-value" id="fpSavingTarget">—</div>
-                <div class="fp-dep-goal-foot" id="fpSavingTargetFoot">Al 31 de diciembre</div>
-              </div>
-            </div>
-
-            <!-- Plan autom?tico ? aparece al definir meta, debajo de las tarjetas -->
-            <div class="fp-dep-plan" id="fpDepPlanVisual" style="display:none">
-              <div class="fp-dep-plan-hero">
-                <div class="fp-dep-plan-hero-label">Límite de gasto mensual</div>
-                <div class="fp-dep-plan-hero-value" id="fpPlanHeroValue">—</div>
-                <div class="fp-dep-plan-hero-sub">Respeta este monto y tus ingresos harán el resto automáticamente</div>
-              </div>
-              <div class="fp-dep-plan-how">
-                <div class="fp-dep-plan-how-title">Cómo se acumula tu ahorro</div>
-                <div class="fp-dep-plan-table" id="fpDepPlanTable"></div>
-              </div>
-            </div>
-
-            <div class="fp-dep-goal-note" id="fpDepGoalNote" style="display:none"></div>
-          </div>
-
-        </div><!-- /fpDepResults -->
-      </div><!-- /fpDepPanel -->
-
-
-      </section>
-
-      </div>
-
-      <section class="grid" id="descriptiveChartsView">
-        <div class="chart-card" id="chart-evolucion">
-          <div class="chart-title">📈 Evolución de Ingresos y Egresos</div>
-          <div class="chart-subtitle">Compara la trayectoria diaria para detectar cambios bruscos, tendencia general y picos de gasto.</div>
-          <div class="chart-container">
-            <div id="chartEvolucionCanvas" class="chart-canvas"></div>
-            <div class="chart-empty-overlay" id="emptyEvolucion">
-              <span class="chart-empty-icon">📈</span>
-              <span class="chart-empty-text">Sin transacciones en este periodo</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-card" id="chart-distribucion">
-          <div class="chart-title" id="titleDistribucion">🍰 Distribución de Gastos</div>
-          <div class="chart-subtitle">Resume cómo se reparte el gasto por categoría y destaca dónde se concentra el presupuesto.</div>
-          <div class="chart-container">
-            <div id="chartDistribucionCanvas" class="chart-canvas"></div>
-            <div class="chart-empty-overlay" id="emptyDistribucion">
-              <span class="chart-empty-icon">🍰</span>
-              <span class="chart-empty-text">Sin transacciones en este periodo</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-card" id="chart-medio-pago">
-          <div class="chart-title" id="titleMedioPago">💳 Gasto por Medio de Pago</div>
-          <div class="chart-subtitle">Muestra qué medio de pago usas más y ayuda a comparar intensidad de uso entre canales.</div>
-          <div class="chart-scroll-wrapper">
-            <div class="chart-container">
-              <div id="chartMedioPagoCanvas" class="chart-canvas"></div>
-              <div class="chart-empty-overlay" id="emptyMedioPago">
-                <span class="chart-empty-icon">💳</span>
-                <span class="chart-empty-text">Sin transacciones en este periodo</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-card" id="chart-cierre-caja">
-          <div class="chart-title chart-title-clean">🧾 Cierre de Caja por Mes</div>
-          <div class="chart-subtitle">Resume el cierre mensual para entender el resultado neto y detectar meses más débiles.</div>
-          <div class="chart-scroll-wrapper">
-            <div class="chart-container">
-              <div id="chartCierreCajaCanvas" class="chart-canvas"></div>
-              <div class="chart-empty-overlay" id="emptyCierreCaja">
-                <span class="chart-empty-icon">🧾</span>
-                <span class="chart-empty-text">Sin transacciones en este periodo</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-card" id="chart-ing-vs-egr-mes">
-          <div class="chart-title chart-title-clean">⚖ Ingresos vs Egresos por Mes</div>
-          <div class="chart-subtitle">Permite comparar entradas y salidas mes a mes para leer equilibrio o presi?n financiera.</div>
-          <div class="chart-scroll-wrapper">
-            <div class="chart-container">
-              <div id="chartIngVsEgrMesCanvas" class="chart-canvas"></div>
-              <div class="chart-empty-overlay" id="emptyIngVsEgr">
-                <span class="chart-empty-icon">⚖</span>
-                <span class="chart-empty-text">Sin transacciones en este periodo</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- [TX_TABLE] Tabla de Transacciones con cross-filtering -->
-      <!-- Tooltip flotante de detalle -->
-      <div id="txTooltip"></div>
-
-      <section class="tx-section" id="txSection">
-        <div class="tx-header">
-          <div>
-            <div class="tx-title">🧾 Detalle de Transacciones</div>
-            <div class="tx-subtitle">Pasa el cursor para ver el detalle y haz click en un gráfico para filtrar esta tabla</div>
-          </div>
-          <div class="tx-controls">
-            <input type="search" id="txSearchInput" placeholder="🔎 Buscar categoría, medio o comentario..." aria-label="Buscar en transacciones" />
-            <span id="txCount" class="tx-count">0</span>
-            <button id="btnExportCsv" title="Exportar tabla actual a CSV" aria-label="Exportar a CSV">⬇ CSV</button>
-          </div>
-        </div>
-        <div class="tx-filter-indicator" id="txChartFilterIndicator" aria-live="polite">
-          <span class="tx-filter-chip" id="txChartFilterLabel"></span>
-          <button type="button" class="tx-filter-clear" id="btnClearTxChartFilter">Quitar filtro del gráfico</button>
-        </div>
-        <div class="tx-scroll">
-          <table class="tx-table">
-            <thead>
-              <tr>
-                <th class="tx-sortable tx-sort-active" data-sort="fecha">Fecha <span class="tx-sort-icon">↕</span></th>
-                <th>Tipo</th>
-                <th class="tx-sortable" data-sort="categoria">Categoría <span class="tx-sort-icon">↕</span></th>
-                <th class="tx-sortable tx-right" data-sort="valorNum">Valor <span class="tx-sort-icon">↕</span></th>
-                <th class="tx-sortable" data-sort="medio">Medio de Pago <span class="tx-sort-icon">↕</span></th>
-                <th>Comentario</th>
-              </tr>
-            </thead>
-            <tbody id="txBody">
-              <tr><td colspan="6" class="tx-empty">Cargando datos...</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="tx-pagination" id="txPagination" style="display:none">
-          <button id="txPrevBtn" class="tx-page-btn" aria-label="Página anterior">← Anterior</button>
-          <span id="txPageInfo" class="tx-page-info">Pág. 1 / 1</span>
-          <button id="txNextBtn" class="tx-page-btn" aria-label="Siguiente página">Siguiente →</button>
-          <span id="txPageSizeInfo" class="tx-page-size-info"></span>
-        </div>
-      </section>
-
-      <div class="footer">
-        <div id="lastUpdate">Última actualización: Esperando datos...</div>
-      </div>
-    </main>
-
-    <button id="btnTop" title="Volver arriba (Alt+T)" aria-label="Volver al inicio de la página">&#8679;</button>
-    <button id="btnDark" title="Cambiar modo oscuro/claro" aria-label="Activar o desactivar modo oscuro">🌙</button>
-    <button id="btnNewTx" title="Registrar nueva transacci?n" aria-label="Registrar nueva transacci?n">+</button>
-
-    <script>
+<script>
       const DEMO_REFERENCE_DATE = new Date(2026, 2, 31, 12, 0, 0);
 
       const VALUES_DB = (function() {
@@ -7771,5 +7821,41 @@
         setInterval(applyFilters, 300000);
       });
     </script>
-  </body>
-  </html>
+<script>
+(function(){
+  const KEY='portfolio_mobile_mode_v2';
+  const DISMISS='portfolio_mobile_prompt_dismissed_v2';
+  const isPhone=()=>window.matchMedia('(max-width:700px)').matches;
+  const body=document.body, banner=document.getElementById('mobileModeBanner');
+  const enable=document.getElementById('btnEnableMobileMode');
+  const dismiss=document.getElementById('btnDismissMobileMode');
+  const toggle=document.getElementById('btnMobileMode');
+  function resizeCharts(){
+    try{
+      if(window.charts && typeof window.charts==='object') Object.keys(window.charts).forEach(k=>{const c=window.charts[k]; if(c&&typeof c.resize==='function') c.resize();});
+    }catch(e){}
+    try{ window.dispatchEvent(new Event('resize')); }catch(e){}
+  }
+  function setMode(on,save=true){
+    body.classList.toggle('mobile-mode',!!on);
+    if(save) localStorage.setItem(KEY,on?'1':'0');
+    if(toggle) toggle.textContent=on?'🖥️ Vista normal':'📱 Modo móvil';
+    setTimeout(resizeCharts,120); setTimeout(resizeCharts,450);
+  }
+  function init(){
+    const saved=localStorage.getItem(KEY)==='1';
+    setMode(saved,false);
+    if(isPhone() && !saved && localStorage.getItem(DISMISS)!=='1') banner.classList.add('show');
+  }
+  enable&&enable.addEventListener('click',()=>{setMode(true);banner.classList.remove('show');});
+  dismiss&&dismiss.addEventListener('click',()=>{localStorage.setItem(DISMISS,'1');banner.classList.remove('show');});
+  toggle&&toggle.addEventListener('click',()=>setMode(!body.classList.contains('mobile-mode')));
+  window.addEventListener('orientationchange',()=>setTimeout(resizeCharts,350));
+  window.addEventListener('resize',()=>{
+    if(!isPhone()){banner.classList.remove('show');}
+    else if(!body.classList.contains('mobile-mode') && localStorage.getItem(DISMISS)!=='1' && localStorage.getItem(KEY)!=='1') banner.classList.add('show');
+  });
+  document.addEventListener('DOMContentLoaded',init);
+})();
+</script><button aria-label="Cambiar vista móvil" class="mobile-mode-toggle" id="btnMobileMode" title="Cambiar vista móvil" type="button">📱 Modo móvil</button></body>
+</html>
