@@ -2343,7 +2343,7 @@
         Finanzas Personales
        </span>
        <span class="brand-sub" id="sidebarLastUpdate">
-        Sincronizando...
+        Datos locales
        </span>
       </div>
      </div>
@@ -4952,9 +4952,18 @@
       function updateLastUpdateText() {
         const now = new Date(DEMO_REFERENCE_DATE);
         const txt = now.toLocaleString('es-PE', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
-        document.getElementById('lastUpdate').textContent = 'Última actualización: ' + txt;
+        const lastUpdate = document.getElementById('lastUpdate');
+        if (lastUpdate) lastUpdate.textContent = 'Última actualización: ' + txt;
         const chip = document.getElementById('lastUpdateChip');
         if (chip) chip.textContent = '⏱ ' + now.toLocaleString('es-PE', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+
+        // Este portafolio trabaja únicamente con datos locales ficticios.
+        // No mostrar estados como "Sincronizando..." porque no existe ninguna
+        // sincronización externa.
+        const sidebarLastUpdate = document.getElementById('sidebarLastUpdate');
+        if (sidebarLastUpdate) {
+          sidebarLastUpdate.textContent = 'Datos locales · ' + now.toLocaleDateString('es-PE', { day:'2-digit', month:'short', year:'numeric' });
+        }
       }
 
       function normalizeMedioKey(cat) {
@@ -5431,8 +5440,24 @@
           { name: 'Ingresos', data: (data.charts.evolucion.ingresos || []).map(p => [p.t, p.v]) },
           { name: 'Egresos',  data: (data.charts.evolucion.egresos  || []).map(p => [p.t, p.v]) }
         ];
+        const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(point => Number(point[1]) || 0));
+        const evolucionMax = evolucionValues.length ? Math.max(...evolucionValues) : 0;
+        // El eje debe partir siempre desde cero para no ocultar los importes bajos.
+        // Esto evita que ApexCharts recorte visualmente la serie cuando hay un pico
+        // mucho mayor que el resto de movimientos.
+        const evolucionYMax = evolucionMax > 0 ? Math.max(1, evolucionMax * 1.12) : 1;
         charts.evolucion.updateSeries(evolucionSeries);
-        charts.evolucion.updateOptions({ annotations: { points: [] } });
+        charts.evolucion.updateOptions({
+          yaxis: {
+            min: 0,
+            max: evolucionYMax,
+            forceNiceScale: true,
+            labels: {
+              formatter: (val) => Number(val || 0).toLocaleString('es-PE', { notation: 'compact', maximumFractionDigits: 0 })
+            }
+          },
+          annotations: { points: [] }
+        });
 
         const donutColors = (tipo === 'Ingreso') ? COLORS.donutIngreso : COLORS.donut;
         charts.distribucion.updateOptions({ colors: donutColors, labels: data.charts.distribucion.labels || [] });
@@ -7266,6 +7291,19 @@
           if (e.key === 'd' || e.key === 'D') { e.preventDefault(); setActiveView('descriptive'); }
           if (e.key === 'p' || e.key === 'P') { e.preventDefault(); setActiveView('forecast'); }
           if (e.key === 't' || e.key === 'T') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        });
+
+        // Drawer de filtros: el botón superior debe abrir/cerrar el panel sin depender
+        // de ninguna fuente externa.
+        const btnToggleFilters = document.getElementById('btnToggleFilters');
+        if (btnToggleFilters) {
+          btnToggleFilters.addEventListener('click', function() {
+            toggleFilterDrawer();
+          });
+        }
+
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') toggleFilterDrawer(false);
         });
 
         document.getElementById('moneda').addEventListener('change', applyFilters);
