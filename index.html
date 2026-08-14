@@ -795,13 +795,16 @@
       min-height: 0;
       width: 100%;
     }
+    /* El gráfico ocupa exactamente el espacio que le asigna su tarjeta.
+       Nunca define ni aumenta la altura del grid padre. */
     .chart-canvas-wrapper {
       width: 100%;
-      height: 245px;
+      height: 100%;
       max-height: 100%;
       min-height: 0;
       overflow: hidden;
-      flex: 0 0 auto;
+      flex: 1 1 auto;
+      position: relative;
     }
     .chart-canvas-wrapper .apexcharts-canvas,
     .chart-canvas-wrapper .apexcharts-svg {
@@ -809,6 +812,15 @@
     }
     .chart-body-169 {
       overflow: hidden;
+    }
+
+    /* Hard limit: ApexCharts/SVG must remain inside the visual card. */
+    .chart-card-169 .chart-body-169 > .chart-canvas-wrapper,
+    .dual-chart-card-169 .chart-body-169 > .chart-canvas-wrapper {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      min-height: 0 !important;
+      max-height: 100% !important;
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -978,6 +990,13 @@
       min-height: 0;
       overflow: hidden;
     }
+    .dual-chart-card-169 .chart-body-169 {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
     .dual-tab-switcher {
       display: inline-flex;
       background: var(--surface-subtle);
@@ -2164,8 +2183,9 @@
       }
       body.mobile-mode .chart-canvas-wrapper {
         overflow: hidden;
-        height: 270px;
-        max-height: 270px;
+        height: 100% !important;
+        max-height: 100% !important;
+        flex: 1 1 auto;
       }
       body.mobile-mode .chart-body-169 {
         overflow: hidden;
@@ -5061,18 +5081,16 @@
       let responsiveChartResizeTimer = null;
 
       function getResponsiveChartHeights() {
-        // Alturas deliberadamente acotadas para que ApexCharts nunca haga crecer
-        // el grid padre de forma recursiva. El layout 16:9 controla el espacio;
-        // el gráfico se adapta DENTRO de su tarjeta, no al revés.
-        const mobile = document.body.classList.contains('mobile-mode');
+        // ApexCharts ocupa el 100% del cuerpo de su tarjeta.
+        // El layout 16:9 controla la altura; el gráfico no puede agrandarlo.
         return {
-          evolucion: mobile ? 270 : 245,
-          distribucion: mobile ? 270 : 245,
-          medioPago: mobile ? 270 : 245,
-          cierreCaja: mobile ? 270 : 245,
-          ingVsEgr: mobile ? 270 : 245,
-          forecastTrend: mobile ? 300 : 255,
-          depSalary: mobile ? 270 : 240
+          evolucion: '100%',
+          distribucion: '100%',
+          medioPago: '100%',
+          cierreCaja: '100%',
+          ingVsEgr: '100%',
+          forecastTrend: '100%',
+          depSalary: '100%'
         };
       }
 
@@ -5268,6 +5286,11 @@
           annotations: { points: [] }
         });
         charts.ingVsEgr.render();
+        requestAnimationFrame(function(){
+          Object.values(charts || {}).filter(Boolean).forEach(function(chart){
+            if (chart && typeof chart.resize === 'function') chart.resize();
+          });
+        });
 
         charts.forecastTrend = new ApexCharts(document.querySelector("#chartForecastTrend"), {
           chart: { type: 'line', height: chartHeights.forecastTrend, toolbar: { show: false }, zoom: { enabled: false } },
