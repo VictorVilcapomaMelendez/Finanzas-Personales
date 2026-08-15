@@ -5521,7 +5521,11 @@
               { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => [p.t, p.v]) },
               { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => [p.t, p.v]) }
             ];
-        const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(point => Number(point[1]) || 0));
+        const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(point => {
+          // En vista mensual los puntos son números; en vista diaria son pares [timestamp, valor].
+          // Normalizamos ambos formatos para que el eje Y use los valores reales.
+          return Number(Array.isArray(point) ? point[1] : point) || 0;
+        }));
         const evolucionMax = evolucionValues.length ? Math.max(...evolucionValues) : 0;
         // El eje debe partir siempre desde cero para no ocultar los importes bajos.
         // Esto evita que ApexCharts recorte visualmente la serie cuando hay un pico
