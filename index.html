@@ -5154,10 +5154,9 @@
               const ing = series[0] ? (series[0][dataPointIndex] || 0) : 0;
               const egr = series[1] ? (series[1][dataPointIndex] || 0) : 0;
               const ts  = w.globals.seriesX[0] ? w.globals.seriesX[0][dataPointIndex] : null;
-              if (effectiveEvolGranularity === 'month' && ts) {
-                const d = new Date(ts);
-                const label = d.toLocaleDateString('es-PE', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-                const pretty = label.charAt(0).toUpperCase() + label.slice(1);
+              const categoryLabel = w.globals.categoryLabels?.[dataPointIndex] || monthlyCategories[dataPointIndex] || '';
+              if (effectiveEvolGranularity === 'month' && categoryLabel) {
+                const pretty = categoryLabel;
                 return `<div style="background:#fff;border:1px solid #E5ECF6;border-radius:10px;padding:10px 13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;min-width:180px;box-shadow:0 4px 14px rgba(0,0,0,.12);">
                   <div style="font-weight:700;font-size:11px;color:#5C6F84;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">${pretty}</div>
                   <div style="display:flex;justify-content:space-between;margin:4px 0;"><span style="color:${COLORS.ingreso};font-weight:600;">Ingresos</span><span style="font-weight:700;">${fmtCurrency(ing)}</span></div>
@@ -5507,10 +5506,21 @@
         const evolSource = effectiveEvolGranularity === 'month'
           ? (data.charts.evolucionMensual || data.charts.evolucion)
           : data.charts.evolucion;
-        const evolucionSeries = [
-          { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => [p.t, p.v]) },
-          { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => [p.t, p.v]) }
-        ];
+        // En vista mensual usamos un eje CATEGORY, no datetime.
+        // Así ApexCharts dibuja exactamente un punto por cada mes disponible
+        // y evita repetir "Ene 26", "Ene 26"... por los ticks automáticos.
+        const monthlyCategories = effectiveEvolGranularity === 'month'
+          ? (data.charts.ingVsEgrMes?.categories || []).slice()
+          : [];
+        const evolucionSeries = effectiveEvolGranularity === 'month'
+          ? [
+              { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => Number(p.v) || 0) },
+              { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => Number(p.v) || 0) }
+            ]
+          : [
+              { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => [p.t, p.v]) },
+              { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => [p.t, p.v]) }
+            ];
         const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(point => Number(point[1]) || 0));
         const evolucionMax = evolucionValues.length ? Math.max(...evolucionValues) : 0;
         // El eje debe partir siempre desde cero para no ocultar los importes bajos.
@@ -5519,19 +5529,28 @@
         const evolucionYMax = evolucionMax > 0 ? Math.max(1, evolucionMax * 1.12) : 1;
         charts.evolucion.updateSeries(evolucionSeries);
         charts.evolucion.updateOptions({
-          xaxis: {
-            type: 'datetime',
-            labels: {
-              datetimeUTC: true,
-              formatter: function(val, timestamp) {
-                const d = new Date(timestamp);
-                if (effectiveEvolGranularity === 'month') {
-                  return d.toLocaleDateString('es-PE', { month: 'short', year: '2-digit', timeZone: 'UTC' });
+          xaxis: effectiveEvolGranularity === 'month'
+            ? {
+                type: 'category',
+                categories: monthlyCategories,
+                tickAmount: monthlyCategories.length,
+                labels: {
+                  rotate: 0,
+                  hideOverlappingLabels: false,
+                  trim: false,
+                  formatter: function(value) { return value; }
                 }
-                return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
               }
-            }
-          },
+            : {
+                type: 'datetime',
+                labels: {
+                  datetimeUTC: true,
+                  formatter: function(val, timestamp) {
+                    const d = new Date(timestamp);
+                    return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+                  }
+                }
+              },
           yaxis: {
             min: 0,
             max: evolucionYMax,
