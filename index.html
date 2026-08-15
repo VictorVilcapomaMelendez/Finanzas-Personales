@@ -1,6 +1,7 @@
 <!--
   @file index.html
-  @description Portfolio público del Dashboard Financiero Personal - Layout
+  @description Portfolio público del Dashboard Financiero Personal - Layout Analítico 16:9 Profesional.
+              Ejecutable localmente con datos ficticios. Sin APIs, claves, tokens ni endpoints privados.
 -->
 <!DOCTYPE html>
 <html lang="es">
@@ -5154,7 +5155,7 @@
               const ing = series[0] ? (series[0][dataPointIndex] || 0) : 0;
               const egr = series[1] ? (series[1][dataPointIndex] || 0) : 0;
               const ts  = w.globals.seriesX[0] ? w.globals.seriesX[0][dataPointIndex] : null;
-              const categoryLabel = w.globals.categoryLabels?.[dataPointIndex] || monthlyCategories[dataPointIndex] || '';
+              const categoryLabel = w.config.xaxis?.categories?.[dataPointIndex] || w.globals.categoryLabels?.[dataPointIndex] || '';
               if (effectiveEvolGranularity === 'month' && categoryLabel) {
                 const pretty = categoryLabel;
                 return `<div style="background:#fff;border:1px solid #E5ECF6;border-radius:10px;padding:10px 13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;min-width:180px;box-shadow:0 4px 14px rgba(0,0,0,.12);">
@@ -5509,40 +5510,68 @@
         // En vista mensual usamos un eje CATEGORY, no datetime.
         // Así ApexCharts dibuja exactamente un punto por cada mes disponible
         // y evita repetir "Ene 26", "Ene 26"... por los ticks automáticos.
+        const evolutionMonthNames = {
+          Ene: 'Enero', Feb: 'Febrero', Mar: 'Marzo', Abr: 'Abril', May: 'Mayo', Jun: 'Junio',
+          Jul: 'Julio', Ago: 'Agosto', Sep: 'Septiembre', Oct: 'Octubre', Nov: 'Noviembre', Dic: 'Diciembre'
+        };
         const monthlyCategories = effectiveEvolGranularity === 'month'
-          ? (data.charts.ingVsEgrMes?.categories || []).slice()
+          ? (data.charts.ingVsEgrMes?.categories || []).map(label => {
+              const parts = String(label).trim().split(/\s+/);
+              const month = evolutionMonthNames[parts[0]] || parts[0];
+              const year = parts[1] ? String(parts[1]).slice(-2) : '';
+              return year ? `${month} ${year}` : month;
+            })
           : [];
+        // Para la vista mensual usamos puntos con x/y explícitos. Esto evita que
+        // ApexCharts trate los meses como índices (0, 1, 2) y garantiza que cada
+        // punto quede exactamente sobre Ene 2026, Feb 2026, Mar 2026, etc.
         const evolucionSeries = effectiveEvolGranularity === 'month'
           ? [
-              { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => Number(p.v) || 0) },
-              { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => Number(p.v) || 0) }
+              { name: 'Ingresos', data: monthlyCategories.map((label, i) => ({ x: label, y: Number((evolSource.ingresos || [])[i]?.v) || 0 })) },
+              { name: 'Egresos',  data: monthlyCategories.map((label, i) => ({ x: label, y: Number((evolSource.egresos  || [])[i]?.v) || 0 })) }
             ]
           : [
-              { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => [p.t, p.v]) },
-              { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => [p.t, p.v]) }
+              { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => [p.t, Number(p.v) || 0]) },
+              { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => [p.t, Number(p.v) || 0]) }
             ];
+
         const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(point => {
-          // En vista mensual los puntos son números; en vista diaria son pares [timestamp, valor].
-          // Normalizamos ambos formatos para que el eje Y use los valores reales.
-          return Number(Array.isArray(point) ? point[1] : point) || 0;
+          return Number(Array.isArray(point) ? point[1] : point?.y) || 0;
         }));
         const evolucionMax = evolucionValues.length ? Math.max(...evolucionValues) : 0;
-        // El eje debe partir siempre desde cero para no ocultar los importes bajos.
-        // Esto evita que ApexCharts recorte visualmente la serie cuando hay un pico
-        // mucho mayor que el resto de movimientos.
-        const evolucionYMax = evolucionMax > 0 ? Math.max(1, evolucionMax * 1.12) : 1;
+
+        // Escala monetaria legible: 0, 200, 400, 600, 800, 1000 para un máximo
+        // cercano a S/. 900; evita saltos poco intuitivos como 175, 350, 525, 701, 876.
+        function niceEvolutionScale(maxValue) {
+          if (!(maxValue > 0)) return { max: 1, step: 0.2 };
+          const rawStep = maxValue / 5;
+          const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
+          const normalized = rawStep / magnitude;
+          let niceNormalized;
+          if (normalized <= 1) niceNormalized = 1;
+          else if (normalized <= 2) niceNormalized = 2;
+          else if (normalized <= 2.5) niceNormalized = 2.5;
+          else if (normalized <= 5) niceNormalized = 5;
+          else niceNormalized = 10;
+          const step = niceNormalized * magnitude;
+          return { max: Math.ceil(maxValue / step) * step, step };
+        }
+        const evolucionScale = niceEvolutionScale(evolucionMax);
+        const evolucionYMax = evolucionScale.max;
         charts.evolucion.updateSeries(evolucionSeries);
         charts.evolucion.updateOptions({
           xaxis: effectiveEvolGranularity === 'month'
             ? {
                 type: 'category',
                 categories: monthlyCategories,
-                tickAmount: monthlyCategories.length,
+                tickAmount: Math.max(1, monthlyCategories.length - 1),
+                axisTicks: { show: true },
                 labels: {
                   rotate: 0,
                   hideOverlappingLabels: false,
+                  showDuplicates: false,
                   trim: false,
-                  formatter: function(value) { return value; }
+                  formatter: function(value) { return String(value); }
                 }
               }
             : {
@@ -5558,7 +5587,9 @@
           yaxis: {
             min: 0,
             max: evolucionYMax,
-            forceNiceScale: true,
+            tickAmount: 5,
+            forceNiceScale: false,
+            decimalsInFloat: 0,
             labels: {
               formatter: (val) => Number(val || 0).toLocaleString('es-PE', { notation: 'compact', maximumFractionDigits: 0 })
             }
@@ -5982,14 +6013,26 @@
             options.tipo = si === 0 ? 'Ingreso' : 'Egreso';
             options.chartCardId = 'chart-ing-vs-egr-mes';
           } else if (elId === 'chartEvolucionCanvas') {
-            const ts = w.globals.seriesX[si] ? w.globals.seriesX[si][di] : null;
-            if (!ts) return null;
-            const d = new Date(ts);
-            const yy = d.getUTCFullYear();
-            const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-            const dd = String(d.getUTCDate()).padStart(2, '0');
-            field = 'fecha';
-            label = `${yy}-${mm}-${dd}`;
+            if (effectiveEvolGranularity === 'month') {
+              const monthLabelSelected = w.config.xaxis?.categories?.[di] || w.globals.categoryLabels?.[di];
+              if (!monthLabelSelected) return null;
+              const monthMap = { Enero: '01', Febrero: '02', Marzo: '03', Abril: '04', Mayo: '05', Junio: '06', Julio: '07', Agosto: '08', Septiembre: '09', Octubre: '10', Noviembre: '11', Diciembre: '12', Ene: '01', Feb: '02', Mar: '03', Abr: '04', May: '05', Jun: '06', Jul: '07', Ago: '08', Sep: '09', Oct: '10', Nov: '11', Dic: '12' };
+              const parts = String(monthLabelSelected).trim().split(/\s+/);
+              const mm = monthMap[parts[0]];
+              const yy = parts[1];
+              if (!mm || !yy) return null;
+              field = 'mes';
+              label = `${yy}-${mm}`;
+            } else {
+              const ts = w.globals.seriesX[si] ? w.globals.seriesX[si][di] : null;
+              if (!ts) return null;
+              const d = new Date(ts);
+              const yy = d.getUTCFullYear();
+              const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+              const dd = String(d.getUTCDate()).padStart(2, '0');
+              field = 'fecha';
+              label = `${yy}-${mm}-${dd}`;
+            }
             options.tipo = si === 0 ? 'Ingreso' : 'Egreso';
             options.chartCardId = 'chart-evolucion';
           } else {
@@ -6025,14 +6068,26 @@
               label = w.config.xaxis.categories[di];
               options.tipo = si === 0 ? 'Ingreso' : 'Egreso';
             } else if (elId === 'chartEvolucionCanvas') {
-              const ts = w.globals.seriesX[si] ? w.globals.seriesX[si][di] : null;
-              if (!ts) return;
-              const d = new Date(ts);
-              const yy = d.getUTCFullYear();
-              const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-              const dd = String(d.getUTCDate()).padStart(2, '0');
-              field = 'fecha';
-              label = `${yy}-${mm}-${dd}`;
+              if (effectiveEvolGranularity === 'month') {
+                const monthLabelSelected = w.config.xaxis?.categories?.[di] || w.globals.categoryLabels?.[di];
+                if (!monthLabelSelected) return;
+                const monthMap = { Enero: '01', Febrero: '02', Marzo: '03', Abril: '04', Mayo: '05', Junio: '06', Julio: '07', Agosto: '08', Septiembre: '09', Octubre: '10', Noviembre: '11', Diciembre: '12', Ene: '01', Feb: '02', Mar: '03', Abr: '04', May: '05', Jun: '06', Jul: '07', Ago: '08', Sep: '09', Oct: '10', Nov: '11', Dic: '12' };
+                const parts = String(monthLabelSelected).trim().split(/\s+/);
+                const mm = monthMap[parts[0]];
+                const yy = parts[1];
+                if (!mm || !yy) return;
+                field = 'mes';
+                label = `${yy}-${mm}`;
+              } else {
+                const ts = w.globals.seriesX[si] ? w.globals.seriesX[si][di] : null;
+                if (!ts) return;
+                const d = new Date(ts);
+                const yy = d.getUTCFullYear();
+                const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+                const dd = String(d.getUTCDate()).padStart(2, '0');
+                field = 'fecha';
+                label = `${yy}-${mm}-${dd}`;
+              }
               options.tipo = si === 0 ? 'Ingreso' : 'Egreso';
             } else return;
             if (!label) return;
