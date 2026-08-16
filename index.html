@@ -1,7 +1,6 @@
 <!--
   @file index.html
-  @description Portfolio público del Dashboard Financiero Personal - Layout Analítico 16:9 Profesional.
-              Ejecutable localmente con datos ficticios. Sin APIs, claves, tokens ni endpoints privados.
+  @description Portfolio público del Dashboard Financiero Personal - Layout
 -->
 <!DOCTYPE html>
 <html lang="es">
@@ -4265,9 +4264,13 @@
           ingresos: months.map(m => monthlyIng.get(m) || 0),
           egresos:  months.map(m => monthlyEgr.get(m) || 0)
         };
+        // Serie mensual para el gráfico de Evolución.
+        // IMPORTANTE: aquí usamos valores simples y el eje X aporta las categorías.
+        // Esto evita que ApexCharts interprete las posiciones como 0, 1, 2.
         const evolucionMensual = {
-          ingresos: months.map(m => ({ t: new Date(m + '-01T12:00:00').getTime(), v: monthlyIng.get(m) || 0 })),
-          egresos:  months.map(m => ({ t: new Date(m + '-01T12:00:00').getTime(), v: monthlyEgr.get(m) || 0 }))
+          categories: months.map(m => monthLabel(m)),
+          ingresos: months.map(m => Number(monthlyIng.get(m) || 0)),
+          egresos:  months.map(m => Number(monthlyEgr.get(m) || 0))
         };
 
         const gastosCatPairs = Array.from(sumPorCategoria.entries()).sort((a,b) => b[1]-a[1]);
@@ -5502,33 +5505,33 @@
         }
 
         effectiveEvolGranularity = activeEvolGranularity === 'auto'
-          ? ((data.charts.ingVsEgrMes?.categories || []).length > 1 ? 'month' : 'day')
+          ? ((data.charts.evolucionMensual?.categories || []).length > 1 ? 'month' : 'day')
           : activeEvolGranularity;
+
         const evolSource = effectiveEvolGranularity === 'month'
-          ? (data.charts.evolucionMensual || data.charts.evolucion)
-          : data.charts.evolucion;
-        // En vista mensual usamos un eje CATEGORY, no datetime.
-        // Así ApexCharts dibuja exactamente un punto por cada mes disponible
-        // y evita repetir "Ene 26", "Ene 26"... por los ticks automáticos.
+          ? (data.charts.evolucionMensual || {})
+          : (data.charts.evolucion || {});
+
+        // Vista mensual: una categoría real por mes y un valor por serie.
+        // NO usamos objetos {x,y} aquí: ApexCharts debe recibir [valor1, valor2, ...]
+        // junto con categories [Enero 26, Febrero 26, ...].
         const evolutionMonthNames = {
           Ene: 'Enero', Feb: 'Febrero', Mar: 'Marzo', Abr: 'Abril', May: 'Mayo', Jun: 'Junio',
           Jul: 'Julio', Ago: 'Agosto', Sep: 'Septiembre', Oct: 'Octubre', Nov: 'Noviembre', Dic: 'Diciembre'
         };
         const monthlyCategories = effectiveEvolGranularity === 'month'
-          ? (data.charts.ingVsEgrMes?.categories || []).map(label => {
+          ? (evolSource.categories || []).map(label => {
               const parts = String(label).trim().split(/\s+/);
               const month = evolutionMonthNames[parts[0]] || parts[0];
               const year = parts[1] ? String(parts[1]).slice(-2) : '';
               return year ? `${month} ${year}` : month;
             })
           : [];
-        // Para la vista mensual usamos puntos con x/y explícitos. Esto evita que
-        // ApexCharts trate los meses como índices (0, 1, 2) y garantiza que cada
-        // punto quede exactamente sobre Ene 2026, Feb 2026, Mar 2026, etc.
+
         const evolucionSeries = effectiveEvolGranularity === 'month'
           ? [
-              { name: 'Ingresos', data: monthlyCategories.map((label, i) => ({ x: label, y: Number((evolSource.ingresos || [])[i]?.v) || 0 })) },
-              { name: 'Egresos',  data: monthlyCategories.map((label, i) => ({ x: label, y: Number((evolSource.egresos  || [])[i]?.v) || 0 })) }
+              { name: 'Ingresos', data: (evolSource.ingresos || []).map(v => Number(v) || 0) },
+              { name: 'Egresos',  data: (evolSource.egresos  || []).map(v => Number(v) || 0) }
             ]
           : [
               { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => [p.t, Number(p.v) || 0]) },
@@ -5536,15 +5539,13 @@
             ];
 
         const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(point => {
-          return Number(Array.isArray(point) ? point[1] : point?.y) || 0;
+          return Number(Array.isArray(point) ? point[1] : point) || 0;
         }));
         const evolucionMax = evolucionValues.length ? Math.max(...evolucionValues) : 0;
 
-        // Escala monetaria legible: 0, 200, 400, 600, 800, 1000 para un máximo
-        // cercano a S/. 900; evita saltos poco intuitivos como 175, 350, 525, 701, 876.
         function niceEvolutionScale(maxValue) {
-          if (!(maxValue > 0)) return { max: 1, step: 0.2 };
-          const rawStep = maxValue / 5;
+          if (!(maxValue > 0)) return { max: 100, step: 20 };
+          const rawStep = maxValue / 4;
           const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
           const normalized = rawStep / magnitude;
           let niceNormalized;
@@ -5554,17 +5555,16 @@
           else if (normalized <= 5) niceNormalized = 5;
           else niceNormalized = 10;
           const step = niceNormalized * magnitude;
-          return { max: Math.ceil(maxValue / step) * step, step };
+          return { max: Math.max(step, Math.ceil(maxValue / step) * step), step };
         }
         const evolucionScale = niceEvolutionScale(evolucionMax);
-        const evolucionYMax = evolucionScale.max;
-        charts.evolucion.updateSeries(evolucionSeries);
+
         charts.evolucion.updateOptions({
           xaxis: effectiveEvolGranularity === 'month'
             ? {
                 type: 'category',
                 categories: monthlyCategories,
-                tickAmount: Math.max(1, monthlyCategories.length - 1),
+                tickPlacement: 'on',
                 axisTicks: { show: true },
                 labels: {
                   rotate: 0,
@@ -5576,6 +5576,7 @@
               }
             : {
                 type: 'datetime',
+                categories: undefined,
                 labels: {
                   datetimeUTC: true,
                   formatter: function(val, timestamp) {
@@ -5586,16 +5587,39 @@
               },
           yaxis: {
             min: 0,
-            max: evolucionYMax,
-            tickAmount: 5,
+            max: evolucionScale.max,
+            tickAmount: 4,
             forceNiceScale: false,
             decimalsInFloat: 0,
             labels: {
-              formatter: (val) => Number(val || 0).toLocaleString('es-PE', { notation: 'compact', maximumFractionDigits: 0 })
+              formatter: (val) => fmtK(Number(val) || 0)
+            }
+          },
+          tooltip: {
+            x: {
+              formatter: function(value) { return String(value || ''); }
             }
           },
           annotations: { points: [] }
-        });
+        }, false, false);
+        charts.evolucion.updateSeries(evolucionSeries, false);
+        if (effectiveEvolGranularity === 'month') {
+          charts.evolucion.updateOptions({
+            xaxis: {
+              type: 'category',
+              categories: monthlyCategories,
+              tickPlacement: 'on',
+              labels: {
+                rotate: 0,
+                hideOverlappingLabels: false,
+                showDuplicates: false,
+                trim: false,
+                formatter: function(value) { return String(value); }
+              }
+            }
+          }, false, false);
+        }
+        charts.evolucion.rendered = true;
 
         const donutColors = (tipo === 'Ingreso') ? COLORS.donutIngreso : COLORS.donut;
         charts.distribucion.updateOptions({ colors: donutColors, labels: data.charts.distribucion.labels || [] });
