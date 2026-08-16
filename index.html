@@ -789,10 +789,18 @@
     }
 
     .chart-body-169 {
-      flex: 1;
+      flex: 1 1 0;
       position: relative;
       min-height: 0;
       width: 100%;
+    }
+
+    /* Los cuerpos de los gráficos deben tener una altura real dentro de
+       tarjetas flex. Sin esta regla, un wrapper con height:100% puede
+       terminar con altura 0 y ApexCharts renderiza el gráfico vacío. */
+    .chart-card-169 > .chart-body-169 {
+      flex: 1 1 0;
+      min-height: 120px;
     }
     /* El gráfico ocupa exactamente el espacio que le asigna su tarjeta.
        Nunca define ni aumenta la altura del grid padre. */
@@ -4296,7 +4304,7 @@
         const medioPairs = Array.from(sumMedio.entries()).sort((a,b) => b[1]-a[1]);
         const medioPago = {
           categories: medioPairs.map(([m]) => m),
-          data: medioPagoData = medioPairs.map(([_, sum]) => sum)
+          data: medioPairs.map(([_, sum]) => round2(sum))
         };
 
         const sumEntidad = new Map();
@@ -4527,6 +4535,10 @@
       let allTransactions = [];
       let activeEvolGranularity = 'auto';
       let effectiveEvolGranularity = 'day';
+      // Claves exactas usadas por el gráfico de evolución para mantener el índice
+      // visual del eje X perfectamente ligado a la fecha/mes real.
+      let evolutionDailyKeys = [];
+      let evolutionMonthlyKeys = [];
       let ytdKpisData     = null;
       let ytdKpisFetched  = false;
       let txSortCol       = 'fecha';
@@ -5086,6 +5098,66 @@
         return points;
       }
 
+      // Etiquetas para el gráfico agrupado de Ingresos vs Egresos.
+      // Se usan anotaciones por punto para poder asignar a cada serie su propio
+      // fondo (verde para ingresos y rojo para egresos) sin alterar los demás gráficos.
+      function buildGroupedBarAnnotations(categories, ingresos, egresos, threshold = 0) {
+        const points = [];
+        for (let i = 0; i < categories.length; i++) {
+          const ing = Number(ingresos[i]) || 0;
+          const egr = Number(egresos[i]) || 0;
+          const category = categories[i];
+
+          // La gráfica es agrupada, por lo que las dos barras comparten la misma
+          // categoría X. offsetX separa visualmente las etiquetas y evita que se
+          // superpongan en pantallas estrechas.
+          if (ing > threshold) {
+            points.push({
+              x: category,
+              y: ing,
+              seriesIndex: 0,
+              marker: { size: 0 },
+              label: {
+                text: fmtCurrency(ing),
+                offsetX: -18,
+                offsetY: -12,
+                borderColor: COLORS.ingreso,
+                style: {
+                  color: '#FFFFFF',
+                  background: COLORS.ingreso,
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: { left: 5, right: 5, top: 3, bottom: 3 }
+                }
+              }
+            });
+          }
+
+          if (egr > threshold) {
+            points.push({
+              x: category,
+              y: egr,
+              seriesIndex: 1,
+              marker: { size: 0 },
+              label: {
+                text: fmtCurrency(egr),
+                offsetX: 18,
+                offsetY: -12,
+                borderColor: COLORS.egreso,
+                style: {
+                  color: '#FFFFFF',
+                  background: COLORS.egreso,
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: { left: 5, right: 5, top: 3, bottom: 3 }
+                }
+              }
+            });
+          }
+        }
+        return points;
+      }
+
       let charts = {};
 
       let responsiveChartResizeTimer = null;
@@ -5144,7 +5216,7 @@
           stroke: { curve: 'smooth', width: 2 },
           markers: { size: 3, hover: { size: 5 } },
           dataLabels: { enabled: false },
-          xaxis: { type: 'datetime', tooltip: { enabled: false }, crosshairs: { show: true, width: 1, stroke: { color: '#9CA3AF', width: 1, dashArray: 4 } }, labels: { datetimeUTC: true, formatter: function(val, timestamp) { return new Date(timestamp).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', timeZone: 'UTC' }); } } },
+          xaxis: { type: 'category', categories: [], tooltip: { enabled: false }, crosshairs: { show: true, width: 1, stroke: { color: '#9CA3AF', width: 1, dashArray: 4 } }, labels: { formatter: function(value) { return String(value || ''); } } },
           yaxis: { 
             labels: { 
               formatter: (val) => val.toLocaleString('es-PE', { notation: "compact", maximumFractionDigits: 0 }),
@@ -5157,8 +5229,10 @@
             custom: function({ series, dataPointIndex, w }) {
               const ing = series[0] ? (series[0][dataPointIndex] || 0) : 0;
               const egr = series[1] ? (series[1][dataPointIndex] || 0) : 0;
-              const ts  = w.globals.seriesX[0] ? w.globals.seriesX[0][dataPointIndex] : null;
               const categoryLabel = w.config.xaxis?.categories?.[dataPointIndex] || w.globals.categoryLabels?.[dataPointIndex] || '';
+              const ts = (effectiveEvolGranularity === 'day' && evolutionDailyKeys[dataPointIndex])
+                ? new Date(evolutionDailyKeys[dataPointIndex] + 'T12:00:00Z').getTime()
+                : null;
               if (effectiveEvolGranularity === 'month' && categoryLabel) {
                 const pretty = categoryLabel;
                 return `<div style="background:#fff;border:1px solid #E5ECF6;border-radius:10px;padding:10px 13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;min-width:180px;box-shadow:0 4px 14px rgba(0,0,0,.12);">
@@ -5264,7 +5338,7 @@
         charts.distribucion.render();
 
         charts.medioPago = new ApexCharts(document.querySelector("#chartMedioPagoCanvas"), {
-          chart: { type: 'bar', height: chartHeights.medioPago, toolbar: { show: false } },
+          chart: { type: 'bar', height: chartHeights.medioPago, parentHeightOffset: 0, toolbar: { show: false } },
           grid: { padding: { top: 16 } },
           colors: [ function({ dataPointIndex, w }) {
             const cat = w.config.xaxis.categories[dataPointIndex];
@@ -5281,7 +5355,7 @@
         charts.medioPago.render();
 
         charts.cierreCaja = new ApexCharts(document.querySelector("#chartCierreCajaCanvas"), {
-          chart: { type: 'bar', height: chartHeights.cierreCaja, toolbar: { show: false } },
+          chart: { type: 'bar', height: chartHeights.cierreCaja, parentHeightOffset: 0, toolbar: { show: false } },
           colors: [ function({ value }) { return value < 0 ? COLORS.egreso : COLORS.ingreso; } ],
           plotOptions: { bar: { borderRadius: 2, columnWidth: '60%' } },
           dataLabels: { enabled: false },
@@ -5512,13 +5586,34 @@
           ? (data.charts.evolucionMensual || {})
           : (data.charts.evolucion || {});
 
-        // Vista mensual: una categoría real por mes y un valor por serie.
-        // NO usamos objetos {x,y} aquí: ApexCharts debe recibir [valor1, valor2, ...]
-        // junto con categories [Enero 26, Febrero 26, ...].
+        // ================================================================
+        // EVOLUCIÓN: eje X categórico en ambas vistas.
+        // Esto evita que ApexCharts mezcle timestamps, índices 0/1/2 y
+        // categorías y garantiza una correspondencia 1:1 entre etiqueta
+        // y valor. La vista diaria conserva la fecha real internamente.
+        // ================================================================
         const evolutionMonthNames = {
           Ene: 'Enero', Feb: 'Febrero', Mar: 'Marzo', Abr: 'Abril', May: 'Mayo', Jun: 'Junio',
           Jul: 'Julio', Ago: 'Agosto', Sep: 'Septiembre', Oct: 'Octubre', Nov: 'Noviembre', Dic: 'Diciembre'
         };
+        const evolutionDailyPoints = (evolSource.ingresos || []);
+        evolutionDailyKeys = evolutionDailyPoints.map(p => {
+          const d = new Date(Number(p.t));
+          const yy = d.getUTCFullYear();
+          const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+          const dd = String(d.getUTCDate()).padStart(2, '0');
+          return `${yy}-${mm}-${dd}`;
+        });
+
+        evolutionMonthlyKeys = (evolSource.categories || []).map(label => {
+          const parts = String(label).trim().split(/\s+/);
+          const month = parts[0];
+          const year = parts[1] ? String(parts[1]).slice(-2) : '';
+          const mmMap = { Ene:'01', Feb:'02', Mar:'03', Abr:'04', May:'05', Jun:'06', Jul:'07', Ago:'08', Sep:'09', Oct:'10', Nov:'11', Dic:'12',
+                          Enero:'01', Febrero:'02', Marzo:'03', Abril:'04', Mayo:'05', Junio:'06', Julio:'07', Agosto:'08', Septiembre:'09', Octubre:'10', Noviembre:'11', Diciembre:'12' };
+          return year && mmMap[month] ? `20${year}-${mmMap[month]}` : '';
+        }).filter(Boolean);
+
         const monthlyCategories = effectiveEvolGranularity === 'month'
           ? (evolSource.categories || []).map(label => {
               const parts = String(label).trim().split(/\s+/);
@@ -5528,23 +5623,26 @@
             })
           : [];
 
-        const evolucionSeries = effectiveEvolGranularity === 'month'
-          ? [
-              { name: 'Ingresos', data: (evolSource.ingresos || []).map(v => Number(v) || 0) },
-              { name: 'Egresos',  data: (evolSource.egresos  || []).map(v => Number(v) || 0) }
-            ]
-          : [
-              { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => [p.t, Number(p.v) || 0]) },
-              { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => [p.t, Number(p.v) || 0]) }
-            ];
+        const dailyCategories = effectiveEvolGranularity === 'day'
+          ? evolutionDailyKeys.map(key => {
+              const [yy, mm, dd] = key.split('-').map(Number);
+              return new Date(Date.UTC(yy, mm - 1, dd)).toLocaleDateString('es-PE', {
+                day: 'numeric', month: 'short', timeZone: 'UTC'
+              }).replace('.', '');
+            })
+          : [];
 
-        const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(point => {
-          return Number(Array.isArray(point) ? point[1] : point) || 0;
-        }));
+        const evolutionCategories = effectiveEvolGranularity === 'month' ? monthlyCategories : dailyCategories;
+        const evolucionSeries = [
+          { name: 'Ingresos', data: (evolSource.ingresos || []).map(p => Number(effectiveEvolGranularity === 'month' ? p : p.v) || 0) },
+          { name: 'Egresos',  data: (evolSource.egresos  || []).map(p => Number(effectiveEvolGranularity === 'month' ? p : p.v) || 0) }
+        ];
+
+        const evolucionValues = evolucionSeries.flatMap(serie => serie.data.map(v => Number(v) || 0));
         const evolucionMax = evolucionValues.length ? Math.max(...evolucionValues) : 0;
 
         function niceEvolutionScale(maxValue) {
-          if (!(maxValue > 0)) return { max: 100, step: 20 };
+          if (!(maxValue > 0)) return { max: 100, step: 25 };
           const rawStep = maxValue / 4;
           const magnitude = Math.pow(10, Math.floor(Math.log10(rawStep)));
           const normalized = rawStep / magnitude;
@@ -5560,65 +5658,38 @@
         const evolucionScale = niceEvolutionScale(evolucionMax);
 
         charts.evolucion.updateOptions({
-          xaxis: effectiveEvolGranularity === 'month'
-            ? {
-                type: 'category',
-                categories: monthlyCategories,
-                tickPlacement: 'on',
-                axisTicks: { show: true },
-                labels: {
-                  rotate: 0,
-                  hideOverlappingLabels: false,
-                  showDuplicates: false,
-                  trim: false,
-                  formatter: function(value) { return String(value); }
-                }
+          xaxis: {
+            type: 'category',
+            categories: evolutionCategories,
+            tickPlacement: 'on',
+            axisTicks: { show: true },
+            labels: {
+              rotate: effectiveEvolGranularity === 'month' ? 0 : -35,
+              rotateAlways: false,
+              hideOverlappingLabels: effectiveEvolGranularity === 'month' ? false : true,
+              showDuplicates: false,
+              trim: false,
+              formatter: function(value, timestamp, opts) {
+                return String(value || '');
               }
-            : {
-                type: 'datetime',
-                categories: undefined,
-                labels: {
-                  datetimeUTC: true,
-                  formatter: function(val, timestamp) {
-                    const d = new Date(timestamp);
-                    return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-                  }
-                }
-              },
+            }
+          },
           yaxis: {
             min: 0,
             max: evolucionScale.max,
             tickAmount: 4,
             forceNiceScale: false,
             decimalsInFloat: 0,
-            labels: {
-              formatter: (val) => fmtK(Number(val) || 0)
-            }
+            labels: { formatter: (val) => fmtK(Number(val) || 0) }
           },
           tooltip: {
-            x: {
-              formatter: function(value) { return String(value || ''); }
-            }
+            shared: true,
+            intersect: false,
+            x: { formatter: function(value) { return String(value || ''); } }
           },
           annotations: { points: [] }
         }, false, false);
         charts.evolucion.updateSeries(evolucionSeries, false);
-        if (effectiveEvolGranularity === 'month') {
-          charts.evolucion.updateOptions({
-            xaxis: {
-              type: 'category',
-              categories: monthlyCategories,
-              tickPlacement: 'on',
-              labels: {
-                rotate: 0,
-                hideOverlappingLabels: false,
-                showDuplicates: false,
-                trim: false,
-                formatter: function(value) { return String(value); }
-              }
-            }
-          }, false, false);
-        }
         charts.evolucion.rendered = true;
 
         const donutColors = (tipo === 'Ingreso') ? COLORS.donutIngreso : COLORS.donut;
@@ -5626,43 +5697,117 @@
         charts.distribucion.updateSeries(data.charts.distribucion.values || []);
         renderDistribucionGastos((data.charts.distribucion.labels || []).map((categoria,i)=>({categoria,monto:(data.charts.distribucion.values || [])[i] || 0})));
 
-        const mpCats  = data.charts.medioPago.categories || [];
-        const mpVals  = data.charts.medioPago.data || [];
-        const mpSeriesName = (tipo === 'Ingreso') ? 'Ingreso' : 'Gasto';
-        const mpColorFn = (tipo === 'Ingreso')
-          ? function({ dataPointIndex, w }) {
-              const cat = w.config.xaxis.categories[dataPointIndex];
-              return colorForMedioIngreso(cat);
+        // ================================================================
+        // MEDIO DE PAGO + CIERRE MENSUAL
+        // Se reconstruyen las opciones con arreglos de colores explícitos
+        // y se fuerza un resize después de actualizar los datos. Esto evita
+        // que ApexCharts conserve un estado vacío/0x0 después de un cambio
+        // de filtros o de vista.
+        // ================================================================
+        // ================================================================
+        // MEDIO DE PAGO + CIERRE MENSUAL
+        // Importante: estos dos gráficos reciben SIEMPRE arrays numéricos
+        // con la misma longitud que sus categorías. Además se recalcula su
+        // tamaño después de cambiar filtros/vistas para evitar un render 0x0.
+        // ================================================================
+        const medioPagoData = data.charts.medioPago || { categories: [], data: [] };
+        const mpCats = Array.isArray(medioPagoData.categories)
+          ? medioPagoData.categories.map(v => String(v || 'N/D'))
+          : [];
+        const mpVals = Array.isArray(medioPagoData.data)
+          ? medioPagoData.data.map(v => { const n = Number(v); return Number.isFinite(n) ? n : 0; })
+          : [];
+        const mpSeriesName = tipo === 'Ingreso' ? 'Ingreso' : 'Gasto';
+        const mpColors = mpCats.map(cat =>
+          tipo === 'Ingreso' ? colorForMedioIngreso(cat) : colorForMedio(cat)
+        );
+
+        charts.medioPago.updateOptions({
+          chart: { type: 'bar', height: '100%', parentHeightOffset: 0 },
+          plotOptions: {
+            bar: {
+              distributed: true,
+              borderRadius: 4,
+              columnWidth: '48%'
             }
-          : function({ dataPointIndex, w }) {
-              const cat = w.config.xaxis.categories[dataPointIndex];
-              return colorForMedio(cat);
-            };
-        const mpAnnotationColorResolver = (tipo === 'Ingreso')
-          ? (cat) => colorForMedioIngreso(cat)
-          : (cat) => colorForMedio(cat);
-        setChartWidth("#chartMedioPagoCanvas", mpCats.length, 60);
-        charts.medioPago.updateOptions({ colors: [mpColorFn], xaxis: { categories: mpCats } });
-        charts.medioPago.updateSeries([{ name: mpSeriesName, data: mpVals }]);
-        const mpAnn = buildBarAnnotations(mpCats, mpVals, mpAnnotationColorResolver, 10, -8);
-        charts.medioPago.updateOptions({ annotations: { points: mpAnn } });
+          },
+          xaxis: {
+            type: 'category',
+            categories: mpCats,
+            labels: { style: { fontSize: '11px' } }
+          },
+          colors: mpColors.length ? mpColors : [COLORS.blue],
+          series: [{ name: mpSeriesName, data: mpVals }]
+        }, false, false);
+        charts.medioPago.updateSeries([{ name: mpSeriesName, data: mpVals }], false);
 
-        const bmCats = data.charts.balanceMensual.categories || [];
-        const bmVals = data.charts.balanceMensual.data || [];
-        setChartWidth("#chartCierreCajaCanvas", bmCats.length, 50);
-        charts.cierreCaja.updateOptions({ xaxis: { categories: bmCats } });
-        charts.cierreCaja.updateSeries([{ name: 'Balance', data: bmVals }]);
-        const ccAnn  = buildBarAnnotations(bmCats, bmVals, (_cat, v) => v < 0 ? COLORS.egreso : COLORS.ingreso, 10);
-        charts.cierreCaja.updateOptions({ annotations: { yaxis: [{ y: 0, borderColor: '#999', strokeDashArray: 0, opacity: 0.5 }], points: ccAnn } });
+        const mpAnn = buildBarAnnotations(
+          mpCats,
+          mpVals,
+          tipo === 'Ingreso' ? (cat) => colorForMedioIngreso(cat) : (cat) => colorForMedio(cat),
+          10,
+          -8
+        );
+        charts.medioPago.updateOptions({ annotations: { points: mpAnn } }, false, false);
 
-        const ivCats = data.charts.ingVsEgrMes.categories || [];
-        const ivIng  = data.charts.ingVsEgrMes.ingresos || [];
-        const ivEgr  = data.charts.ingVsEgrMes.egresos  || [];
+        const balanceMensualData = data.charts.balanceMensual || { categories: [], data: [] };
+        const bmCats = Array.isArray(balanceMensualData.categories)
+          ? balanceMensualData.categories.map(v => String(v || ''))
+          : [];
+        const bmVals = Array.isArray(balanceMensualData.data)
+          ? balanceMensualData.data.map(v => { const n = Number(v); return Number.isFinite(n) ? n : 0; })
+          : [];
+
+        charts.cierreCaja.updateOptions({
+          chart: { type: 'bar', height: '100%', parentHeightOffset: 0 },
+          xaxis: { type: 'category', categories: bmCats },
+          annotations: {
+            yaxis: [{ y: 0, borderColor: '#999', strokeDashArray: 0, opacity: 0.5 }],
+            points: buildBarAnnotations(
+              bmCats,
+              bmVals,
+              (_cat, v) => v < 0 ? COLORS.egreso : COLORS.ingreso,
+              10
+            )
+          }
+        }, false, false);
+        charts.cierreCaja.updateSeries([{ name: 'Balance', data: bmVals }], false);
+
+        // El wrapper puede haber cambiado de tamaño por filtros, tabs o por
+        // el cambio entre vista descriptiva/predictiva. Esperamos al layout
+        // final y recién entonces pedimos a ApexCharts recalcular.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            try {
+              setChartWidth('#chartMedioPagoCanvas', mpCats.length, 60);
+              setChartWidth('#chartCierreCajaCanvas', bmCats.length, 50);
+              charts.medioPago?.resize();
+              charts.cierreCaja?.resize();
+            } catch (_) {}
+          });
+        });
+
+        setChartEmpty('emptyMedioPago', mpVals.length === 0);
+        setChartEmpty('emptyCierreCaja', bmVals.length === 0);
+
+        const ivCats = Array.isArray(data.charts.ingVsEgrMes?.categories)
+          ? data.charts.ingVsEgrMes.categories.map(v => String(v || ''))
+          : [];
+        const ivIng  = Array.isArray(data.charts.ingVsEgrMes?.ingresos)
+          ? data.charts.ingVsEgrMes.ingresos.map(v => { const n = Number(v); return Number.isFinite(n) ? n : 0; })
+          : [];
+        const ivEgr  = Array.isArray(data.charts.ingVsEgrMes?.egresos)
+          ? data.charts.ingVsEgrMes.egresos.map(v => { const n = Number(v); return Number.isFinite(n) ? n : 0; })
+          : [];
+        window.__latestIngVsEgr = { categories: ivCats, ingresos: ivIng, egresos: ivEgr };
         setChartWidth("#chartIngVsEgrMesCanvas", ivCats.length, 50);
-        charts.ingVsEgr.updateOptions({ xaxis: { categories: ivCats } });
-        charts.ingVsEgr.updateSeries([{ name: 'Ingresos', data: ivIng }, { name: 'Egresos', data: ivEgr }]);
-        const ivAnn  = buildStackedAnnotations(ivCats, ivIng, ivEgr, 50);
-        charts.ingVsEgr.updateOptions({ annotations: { points: ivAnn } });
+        charts.ingVsEgr.updateOptions({ xaxis: { categories: ivCats } }, false, false);
+        charts.ingVsEgr.updateSeries([{ name: 'Ingresos', data: ivIng }, { name: 'Egresos', data: ivEgr }], false);
+        // En la vista agrupada, cada serie necesita su propia etiqueta y su propio color.
+        // NO usar buildStackedAnnotations aquí: esa función calcula la posición del
+        // egreso como si estuviera apilado sobre el ingreso.
+        const ivAnn  = buildGroupedBarAnnotations(ivCats, ivIng, ivEgr, 0);
+        charts.ingVsEgr.updateOptions({ annotations: { points: ivAnn } }, false, false);
 
         // Empty states en gráficos
         const hasEvol = (data.charts.evolucion.ingresos || []).length > 0 || (data.charts.evolucion.egresos || []).length > 0;
@@ -6048,14 +6193,10 @@
               field = 'mes';
               label = `${yy}-${mm}`;
             } else {
-              const ts = w.globals.seriesX[si] ? w.globals.seriesX[si][di] : null;
-              if (!ts) return null;
-              const d = new Date(ts);
-              const yy = d.getUTCFullYear();
-              const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-              const dd = String(d.getUTCDate()).padStart(2, '0');
+              const dailyKey = evolutionDailyKeys[di];
+              if (!dailyKey) return null;
               field = 'fecha';
-              label = `${yy}-${mm}-${dd}`;
+              label = dailyKey;
             }
             options.tipo = si === 0 ? 'Ingreso' : 'Egreso';
             options.chartCardId = 'chart-evolucion';
@@ -6103,14 +6244,10 @@
                 field = 'mes';
                 label = `${yy}-${mm}`;
               } else {
-                const ts = w.globals.seriesX[si] ? w.globals.seriesX[si][di] : null;
-                if (!ts) return;
-                const d = new Date(ts);
-                const yy = d.getUTCFullYear();
-                const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-                const dd = String(d.getUTCDate()).padStart(2, '0');
+                const dailyKey = evolutionDailyKeys[di];
+                if (!dailyKey) return;
                 field = 'fecha';
-                label = `${yy}-${mm}-${dd}`;
+                label = dailyKey;
               }
               options.tipo = si === 0 ? 'Ingreso' : 'Egreso';
             } else return;
@@ -7565,14 +7702,162 @@
 function switchDualChart(tab) {
   activeDualTab = tab;
   const isCierre = tab === 'cierre';
-  const a=document.getElementById('btnTabCierre'), b=document.getElementById('btnTabIngVsEgr');
-  const c=document.getElementById('wrapCierreCaja'), d=document.getElementById('wrapIngVsEgr');
-  const t=document.getElementById('dualChartTitle');
-  if(a)a.classList.toggle('active',isCierre); if(b)b.classList.toggle('active',!isCierre);
-  if(c)c.style.display=isCierre?'':'none'; if(d)d.style.display=isCierre?'none':'';
-  if(t)t.textContent=isCierre?'📆 Cierre Mensual':'📊 Ingresos vs Egresos';
-  setTimeout(()=>window.dispatchEvent(new Event('resize')),50);
+  const a = document.getElementById('btnTabCierre');
+  const b = document.getElementById('btnTabIngVsEgr');
+  const c = document.getElementById('wrapCierreCaja');
+  const d = document.getElementById('wrapIngVsEgr');
+  const t = document.getElementById('dualChartTitle');
+
+  if (a) a.classList.toggle('active', isCierre);
+  if (b) b.classList.toggle('active', !isCierre);
+  if (c) c.style.display = isCierre ? '' : 'none';
+  if (d) d.style.display = isCierre ? 'none' : '';
+  if (t) t.textContent = isCierre ? '📆 Cierre Mensual' : '📊 Ingresos vs Egresos';
+
+  // El gráfico Ing vs Egr se creó originalmente cuando su contenedor estaba
+  // oculto (display:none). En ApexCharts eso puede dejar internamente el SVG
+  // con dimensiones inválidas y posteriormente updateSeries() no lo recupera.
+  // La solución robusta es recrear ese gráfico únicamente cuando se activa la
+  // pestaña, cuando el contenedor ya es visible y tiene dimensiones reales.
+  if (!isCierre) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const canvas = document.getElementById('chartIngVsEgrMesCanvas');
+        const wrap = document.getElementById('wrapIngVsEgr');
+        const latest = window.__latestIngVsEgr || { categories: [], ingresos: [], egresos: [] };
+        if (!canvas || !wrap) return;
+
+        try {
+          if (charts.ingVsEgr) {
+            charts.ingVsEgr.destroy();
+            charts.ingVsEgr = null;
+          }
+        } catch (_) {
+          charts.ingVsEgr = null;
+        }
+
+        // Limpiar cualquier SVG/DOM residual de la instancia anterior.
+        canvas.innerHTML = '';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.minWidth = '0';
+        canvas.style.minHeight = '0';
+
+        const rect = wrap.getBoundingClientRect();
+        const width = Math.max(240, Math.floor(rect.width));
+        const height = Math.max(180, Math.floor(rect.height));
+
+        const categories = Array.isArray(latest.categories) ? latest.categories : [];
+        const ingresos = Array.isArray(latest.ingresos)
+          ? latest.ingresos.map(v => Number.isFinite(Number(v)) ? Number(v) : 0)
+          : [];
+        const egresos = Array.isArray(latest.egresos)
+          ? latest.egresos.map(v => Number.isFinite(Number(v)) ? Number(v) : 0)
+          : [];
+
+        charts.ingVsEgr = new ApexCharts(canvas, {
+          chart: {
+            type: 'bar',
+            height: height,
+            width: width,
+            stacked: false,
+            toolbar: { show: false },
+            parentHeightOffset: 0,
+            redrawOnParentResize: true,
+            redrawOnWindowResize: true,
+            animations: { enabled: false }
+          },
+          series: [
+            { name: 'Ingresos', data: ingresos },
+            { name: 'Egresos', data: egresos }
+          ],
+          colors: [COLORS.ingreso, COLORS.egreso],
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              columnWidth: '45%',
+              borderRadius: 3,
+              dataLabels: { position: 'top' }
+            }
+          },
+          // Las etiquetas se dibujan mediante annotations para permitir un
+          // fondo distinto por serie: verde = ingresos, rojo = egresos.
+          dataLabels: { enabled: false },
+          xaxis: {
+            type: 'category',
+            categories: categories,
+            labels: { style: { fontSize: '10px' } }
+          },
+          yaxis: {
+            min: 0,
+            max: Math.max(100, Math.ceil((Math.max(...ingresos, ...egresos, 0) * 1.18) / 100) * 100),
+            tickAmount: 4,
+            labels: {
+              formatter: function(val) {
+                const n = Number(val) || 0;
+                return n.toLocaleString('es-PE', {
+                  notation: 'compact',
+                  maximumFractionDigits: 0
+                });
+              }
+            }
+          },
+          grid: {
+            padding: { top: 8, right: 8, bottom: 8, left: 8 }
+          },
+          legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            fontSize: '11px'
+          },
+          tooltip: {
+            shared: true,
+            intersect: false,
+            y: {
+              formatter: function(val) {
+                return fmtCurrency(Number(val) || 0);
+              }
+            }
+          },
+          annotations: {
+            points: buildGroupedBarAnnotations(categories, ingresos, egresos, 0)
+          }
+        });
+
+        charts.ingVsEgr.render().then(() => {
+          requestAnimationFrame(() => {
+            try { charts.ingVsEgr.resize(); } catch (_) {}
+          });
+        });
+
+        setChartEmpty('emptyIngVsEgr', categories.length === 0 || (ingresos.length === 0 && egresos.length === 0));
+      });
+    });
+    return;
+  }
+
+  // Al volver a Cierre Neto también recalculamos el tamaño porque acabamos de
+  // ocultar el otro canvas y ApexCharts debe recuperar el ancho disponible.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const chart = charts.cierreCaja;
+      const wrap = c;
+      if (!chart || !wrap) return;
+      try {
+        const rect = wrap.getBoundingClientRect();
+        chart.updateOptions({
+          chart: {
+            height: Math.max(180, Math.floor(rect.height)),
+            width: Math.max(240, Math.floor(rect.width)),
+            parentHeightOffset: 0
+          }
+        }, false, false);
+        chart.resize();
+      } catch (_) {}
+    });
+  });
 }
+
 function toggleFilterDrawer(forceState) {
   const drawer=document.getElementById('filterDrawer'), trigger=document.getElementById('btnToggleFilters'); if(!drawer)return;
   const open=forceState!==undefined?forceState:!drawer.classList.contains('open'); drawer.classList.toggle('open',open); if(trigger)trigger.classList.toggle('open',open);
