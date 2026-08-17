@@ -1786,11 +1786,19 @@
     }
 
     @media (max-width: 1024px) {
-      .app-shell { grid-template-columns: 1fr; }
+      /* minmax(0, 1fr) es necesario: un "1fr" a secas conserva un ancho
+         mínimo implícito igual al contenido más ancho (el header con el
+         chip de fechas), así que .main-canvas terminaba siendo más ancho
+         que la pantalla y todo lo de más a la derecha (la 2ª columna de
+         KPIs, etc.) quedaba recortado fuera de la vista. */
+      .app-shell { grid-template-columns: minmax(0, 1fr); }
       .sidebar { display: none; }
       html, body { overflow-y: auto; height: auto; }
       .main-canvas { height: auto; overflow: visible; }
-      .canvas-body { height: auto; overflow: visible; }
+      /* La fila de KPIs pasa a 2 columnas y necesita más de los 82px fijos
+         del layout de escritorio; sin "auto" aquí las tarjetas se salían de
+         su fila y quedaban tapadas por la sección de gráficos de abajo. */
+      .canvas-body { height: auto; overflow: visible; grid-template-rows: auto auto auto; }
       .kpi-row-169 { grid-template-columns: repeat(2, 1fr); height: auto; max-height: none; }
       .charts-grid-middle { grid-template-columns: 1fr; height: auto; }
       .bottom-grid-169 { grid-template-columns: 1fr; height: auto; }
@@ -4826,22 +4834,20 @@
         requestAnimationFrame(() => {
           try {
             if (nextView === 'forecast') {
-              if (charts.forecastTrend) charts.forecastTrend.resize();
-              if (charts.depSalary) charts.depSalary.resize();
+              forceChartResize(charts.forecastTrend);
+              forceChartResize(charts.depSalary);
               if (currentForecast) {
                 renderForecastChart(currentForecast);
                 if (typeof updateForecastGoalSummary === 'function') updateForecastGoalSummary();
               }
             } else {
               [charts.evolucion, charts.distribucion, charts.medioPago, charts.cierreCaja, charts.ingVsEgr]
-                .filter(Boolean).forEach(c => { try { c.resize(); } catch (_) {} });
+                .filter(Boolean).forEach(c => forceChartResize(c));
             }
           } catch (e) { console.warn('Error reflow de vista:', e); }
           window.dispatchEvent(new Event('resize'));
           setTimeout(() => {
-            Object.values(charts).filter(Boolean).forEach(chart => {
-              try { chart.resize(); } catch (_) {}
-            });
+            Object.values(charts).filter(Boolean).forEach(chart => forceChartResize(chart));
           }, 60);
         });
       });
@@ -5160,6 +5166,18 @@
 
       let charts = {};
 
+      // ApexCharts no expone un método público resize(): el objeto Apex real
+      // solo tiene updateOptions/updateSeries/etc. Todas las llamadas a
+      // chart.resize() en este archivo eran no-ops silenciosos (atrapados por
+      // try/catch), por lo que los gráficos quedaban con dimensiones
+      // inválidas tras cambiar de pestaña, de vista o de tamaño de ventana.
+      // Esta es la forma correcta de forzar a ApexCharts a remedir su
+      // contenedor y redibujarse.
+      function forceChartResize(chart) {
+        if (!chart || typeof chart.updateOptions !== 'function') return;
+        try { chart.updateOptions({}, true, true); } catch (_) {}
+      }
+
       let responsiveChartResizeTimer = null;
 
       function getResponsiveChartHeights() {
@@ -5199,7 +5217,7 @@
           applyResponsiveChartHeights();
           requestAnimationFrame(function() {
             Object.values(charts || {}).filter(Boolean).forEach(function(chart) {
-              if (chart && typeof chart.resize === 'function') chart.resize();
+              forceChartResize(chart);
             });
           });
           responsiveChartResizeTimer = null;
@@ -5357,8 +5375,17 @@
         charts.cierreCaja = new ApexCharts(document.querySelector("#chartCierreCajaCanvas"), {
           chart: { type: 'bar', height: chartHeights.cierreCaja, parentHeightOffset: 0, toolbar: { show: false } },
           colors: [ function({ value }) { return value < 0 ? COLORS.egreso : COLORS.ingreso; } ],
-          plotOptions: { bar: { borderRadius: 2, columnWidth: '60%' } },
-          dataLabels: { enabled: false },
+          // Etiqueta de dato nativa centrada en la barra: la versión anterior
+          // dibujaba el texto como anotación flotante encima del punto, lo que
+          // la recortaba fuera del lienzo cuando la barra se acercaba al
+          // máximo del eje Y (quedaba invisible).
+          plotOptions: { bar: { borderRadius: 2, columnWidth: '60%', dataLabels: { position: 'center' } } },
+          dataLabels: {
+            enabled: true,
+            formatter: (val) => fmtK(val),
+            style: { fontSize: '11px', fontWeight: 600, colors: ['#fff'] },
+            background: { enabled: false }
+          },
           xaxis: { categories: [] },
           yaxis: { labels: { formatter: (val) => val.toLocaleString('es-PE', { notation: "compact", maximumFractionDigits: 0 }) } },
           tooltip: { enabled: false },
@@ -5382,7 +5409,7 @@
         charts.ingVsEgr.render();
         requestAnimationFrame(function(){
           Object.values(charts || {}).filter(Boolean).forEach(function(chart){
-            if (chart && typeof chart.resize === 'function') chart.resize();
+            forceChartResize(chart);
           });
         });
 
@@ -5763,12 +5790,7 @@
           xaxis: { type: 'category', categories: bmCats },
           annotations: {
             yaxis: [{ y: 0, borderColor: '#999', strokeDashArray: 0, opacity: 0.5 }],
-            points: buildBarAnnotations(
-              bmCats,
-              bmVals,
-              (_cat, v) => v < 0 ? COLORS.egreso : COLORS.ingreso,
-              10
-            )
+            points: []
           }
         }, false, false);
         charts.cierreCaja.updateSeries([{ name: 'Balance', data: bmVals }], false);
@@ -5781,8 +5803,8 @@
             try {
               setChartWidth('#chartMedioPagoCanvas', mpCats.length, 60);
               setChartWidth('#chartCierreCajaCanvas', bmCats.length, 50);
-              charts.medioPago?.resize();
-              charts.cierreCaja?.resize();
+              forceChartResize(charts.medioPago);
+              forceChartResize(charts.cierreCaja);
             } catch (_) {}
           });
         });
@@ -7489,15 +7511,30 @@
           const textColor  = isDark ? '#94A3B8' : '#5C6F84';
           const gridColor  = isDark ? 'rgba(56,189,248,0.07)' : 'rgba(99,102,241,0.10)';
           const totalColor = isDark ? '#E2E8F0' : '#5C6F84';
-          const axisOpts = {
-            xaxis: { labels: { style: { colors: textColor } } },
-            yaxis: { labels: { formatter: (val) => val.toLocaleString('es-PE', { notation: "compact", maximumFractionDigits: 0 }), style: { colors: textColor } } },
-            legend: { labels: { colors: textColor } },
-            grid:   { borderColor: gridColor },
-            chart:  { foreColor: textColor }
-          };
           ['evolucion', 'medioPago', 'cierreCaja', 'ingVsEgr', 'forecastTrend', 'depSalary'].forEach(key => {
-            if (charts[key]) charts[key].updateOptions(axisOpts, false, false);
+            const chart = charts[key];
+            if (!chart) return;
+            // updateOptions() puede vaciar xaxis.categories al combinar
+            // chart.foreColor con otras opciones (bug conocido de ApexCharts),
+            // dejando el eje X con índices numéricos en vez de fechas/meses.
+            // Reafirmamos aquí las categorías vigentes -leyendo tanto la
+            // config como el cache interno de globals, según dónde las tenga
+            // cada tipo de eje- y forzamos overwriteInitialConfig para que la
+            // corrección persista en el próximo cambio de tema.
+            const cfgCats  = chart.w?.config?.xaxis?.categories;
+            const globCats = chart.w?.globals?.categoryLabels;
+            const currentCategories = (Array.isArray(cfgCats) && cfgCats.length) ? cfgCats
+                                     : (Array.isArray(globCats) && globCats.length) ? globCats
+                                     : null;
+            const xaxisUpdate = { labels: { style: { colors: textColor } } };
+            if (currentCategories) xaxisUpdate.categories = currentCategories;
+            chart.updateOptions({
+              xaxis: xaxisUpdate,
+              yaxis: { labels: { formatter: (val) => val.toLocaleString('es-PE', { notation: "compact", maximumFractionDigits: 0 }), style: { colors: textColor } } },
+              legend: { labels: { colors: textColor } },
+              grid:   { borderColor: gridColor },
+              chart:  { foreColor: textColor }
+            }, true, false, true, true);
           });
           // Donut: actualizar color del label "Total" en el centro
           if (charts.distribucion) {
@@ -7826,7 +7863,7 @@ function switchDualChart(tab) {
 
         charts.ingVsEgr.render().then(() => {
           requestAnimationFrame(() => {
-            try { charts.ingVsEgr.resize(); } catch (_) {}
+            forceChartResize(charts.ingVsEgr);
           });
         });
 
@@ -7851,8 +7888,7 @@ function switchDualChart(tab) {
             width: Math.max(240, Math.floor(rect.width)),
             parentHeightOffset: 0
           }
-        }, false, false);
-        chart.resize();
+        }, true, false);
       } catch (_) {}
     });
   });
@@ -7884,9 +7920,9 @@ function openDemoTransactionNotice(){showToast('Portfolio Demo: los datos son fi
 (function(){
   const BP=600,KEY='dashboardMobileMode',DISMISS='dashboardMobileModeDismissed';
   const phone=()=>window.matchMedia('(max-width:'+BP+'px)').matches;
-  function setMode(on,persist){document.body.classList.toggle('mobile-mode',!!on);const t=document.getElementById('btnMobileMode'),b=document.getElementById('mobileModeBanner'),e=document.getElementById('btnEnableMobileMode');if(t){t.classList.toggle('active',!!on);t.setAttribute('aria-pressed',String(!!on));const l=t.querySelector('.mobile-mode-trigger-label');if(l)l.textContent=on?'Vista normal':'Modo móvil';}if(b)b.classList.toggle('is-visible',phone()&&!on&&!sessionStorage.getItem(DISMISS));if(e)e.textContent=on?'Activado':'Activar';if(persist)localStorage.setItem(KEY,on?'on':'off');requestAnimationFrame(()=>requestAnimationFrame(()=>{try{Object.values(charts||{}).filter(Boolean).forEach(c=>c.resize&&c.resize())}catch(e){}}));}
+  function setMode(on,persist){document.body.classList.toggle('mobile-mode',!!on);const t=document.getElementById('btnMobileMode'),b=document.getElementById('mobileModeBanner'),e=document.getElementById('btnEnableMobileMode');if(t){t.classList.toggle('active',!!on);t.setAttribute('aria-pressed',String(!!on));const l=t.querySelector('.mobile-mode-trigger-label');if(l)l.textContent=on?'Vista normal':'Modo móvil';}if(b)b.classList.toggle('is-visible',phone()&&!on&&!sessionStorage.getItem(DISMISS));if(e)e.textContent=on?'Activado':'Activar';if(persist)localStorage.setItem(KEY,on?'on':'off');requestAnimationFrame(()=>requestAnimationFrame(()=>{try{Object.values(charts||{}).filter(Boolean).forEach(c=>forceChartResize(c))}catch(e){}}));}
   function refresh(){const b=document.getElementById('mobileModeBanner');if(b)b.classList.toggle('is-visible',phone()&&!document.body.classList.contains('mobile-mode')&&!sessionStorage.getItem(DISMISS));}
-  function init(){const t=document.getElementById('btnMobileMode'),e=document.getElementById('btnEnableMobileMode'),d=document.getElementById('btnDismissMobileMode');setMode(localStorage.getItem(KEY)==='on',false);if(t)t.addEventListener('click',()=>{setMode(!document.body.classList.contains('mobile-mode'),true);sessionStorage.removeItem(DISMISS)});if(e)e.addEventListener('click',()=>{setMode(true,true);sessionStorage.removeItem(DISMISS)});if(d)d.addEventListener('click',()=>{sessionStorage.setItem(DISMISS,'1');refresh()});window.addEventListener('resize',refresh,{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',refresh,{passive:true});window.addEventListener('orientationchange',()=>setTimeout(()=>{refresh();try{Object.values(charts||{}).filter(Boolean).forEach(c=>c.resize&&c.resize())}catch(e){}},250),{passive:true});}
+  function init(){const t=document.getElementById('btnMobileMode'),e=document.getElementById('btnEnableMobileMode'),d=document.getElementById('btnDismissMobileMode');setMode(localStorage.getItem(KEY)==='on',false);if(t)t.addEventListener('click',()=>{setMode(!document.body.classList.contains('mobile-mode'),true);sessionStorage.removeItem(DISMISS)});if(e)e.addEventListener('click',()=>{setMode(true,true);sessionStorage.removeItem(DISMISS)});if(d)d.addEventListener('click',()=>{sessionStorage.setItem(DISMISS,'1');refresh()});window.addEventListener('resize',refresh,{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',refresh,{passive:true});window.addEventListener('orientationchange',()=>setTimeout(()=>{refresh();try{Object.values(charts||{}).filter(Boolean).forEach(c=>forceChartResize(c))}catch(e){}},250),{passive:true});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 
