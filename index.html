@@ -1381,7 +1381,8 @@
 
 
     /* ══ RESTORED CROSS-FILTER TOOLTIP / TABLE INTERACTIONS ══ */
-    .txtt-list { display:flex; flex-direction:column; gap:5px; max-height:220px; overflow:auto; }
+    /* Limitado a Top 3 (ver showTxTooltip): siempre cabe sin scroll. */
+    .txtt-list { display:flex; flex-direction:column; gap:5px; }
     .txtt-item {
       display:grid; grid-template-columns:58px minmax(0,1fr) auto;
       gap:6px; align-items:center; padding:5px 0;
@@ -5104,66 +5105,6 @@
         return points;
       }
 
-      // Etiquetas para el gráfico agrupado de Ingresos vs Egresos.
-      // Se usan anotaciones por punto para poder asignar a cada serie su propio
-      // fondo (verde para ingresos y rojo para egresos) sin alterar los demás gráficos.
-      function buildGroupedBarAnnotations(categories, ingresos, egresos, threshold = 0) {
-        const points = [];
-        for (let i = 0; i < categories.length; i++) {
-          const ing = Number(ingresos[i]) || 0;
-          const egr = Number(egresos[i]) || 0;
-          const category = categories[i];
-
-          // La gráfica es agrupada, por lo que las dos barras comparten la misma
-          // categoría X. offsetX separa visualmente las etiquetas y evita que se
-          // superpongan en pantallas estrechas.
-          if (ing > threshold) {
-            points.push({
-              x: category,
-              y: ing,
-              seriesIndex: 0,
-              marker: { size: 0 },
-              label: {
-                text: fmtCurrency(ing),
-                offsetX: -18,
-                offsetY: -12,
-                borderColor: COLORS.ingreso,
-                style: {
-                  color: '#FFFFFF',
-                  background: COLORS.ingreso,
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: { left: 5, right: 5, top: 3, bottom: 3 }
-                }
-              }
-            });
-          }
-
-          if (egr > threshold) {
-            points.push({
-              x: category,
-              y: egr,
-              seriesIndex: 1,
-              marker: { size: 0 },
-              label: {
-                text: fmtCurrency(egr),
-                offsetX: 18,
-                offsetY: -12,
-                borderColor: COLORS.egreso,
-                style: {
-                  color: '#FFFFFF',
-                  background: COLORS.egreso,
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: { left: 5, right: 5, top: 3, bottom: 3 }
-                }
-              }
-            });
-          }
-        }
-        return points;
-      }
-
       let charts = {};
 
       // ApexCharts no expone un método público resize(): el objeto Apex real
@@ -5175,7 +5116,11 @@
       // contenedor y redibujarse.
       function forceChartResize(chart) {
         if (!chart || typeof chart.updateOptions !== 'function') return;
-        try { chart.updateOptions({}, true, true); } catch (_) {}
+        // animate:false — esto es una corrección técnica de layout, no una
+        // acción del usuario; sin esto, dos llamadas seguidas (como en
+        // switchDualChart) podían solaparse a mitad de transición y dejar
+        // las etiquetas de dato con un efecto de "doble exposición".
+        try { chart.updateOptions({}, true, false); } catch (_) {}
       }
 
       let responsiveChartResizeTimer = null;
@@ -5825,11 +5770,9 @@
         setChartWidth("#chartIngVsEgrMesCanvas", ivCats.length, 50);
         charts.ingVsEgr.updateOptions({ xaxis: { categories: ivCats } }, false, false);
         charts.ingVsEgr.updateSeries([{ name: 'Ingresos', data: ivIng }, { name: 'Egresos', data: ivEgr }], false);
-        // En la vista agrupada, cada serie necesita su propia etiqueta y su propio color.
-        // NO usar buildStackedAnnotations aquí: esa función calcula la posición del
-        // egreso como si estuviera apilado sobre el ingreso.
-        const ivAnn  = buildGroupedBarAnnotations(ivCats, ivIng, ivEgr, 0);
-        charts.ingVsEgr.updateOptions({ annotations: { points: ivAnn } }, false, false);
+        // Las etiquetas de dato son nativas de ApexCharts (ver switchDualChart)
+        // y se actualizan solas con updateSeries; ya no requieren anotaciones
+        // manuales por punto.
 
         // Empty states en gráficos
         const hasEvol = (data.charts.evolucion.ingresos || []).length > 0 || (data.charts.evolucion.egresos || []).length > 0;
@@ -6003,8 +5946,8 @@
         const total = rows.reduce((s, r) => s + r.valorNum, 0);
         const tipo1 = rows[0].tipo;
         const cls   = tipo1 === 'Ingreso' ? 'ingreso' : 'egreso';
-        // Calcula cuántos items caben sin scroll según el viewport disponible
-        const MAX   = 6;
+        // Top 3: mantiene el tooltip corto y legible, sin necesidad de scroll.
+        const MAX   = 3;
         const sorted = [...rows].sort((a, b) => b.valorNum - a.valorNum);
         const shown  = sorted.slice(0, MAX);
         const rest   = rows.length - shown.length;
@@ -7817,9 +7760,22 @@ function switchDualChart(tab) {
               dataLabels: { position: 'top' }
             }
           },
-          // Las etiquetas se dibujan mediante annotations para permitir un
-          // fondo distinto por serie: verde = ingresos, rojo = egresos.
-          dataLabels: { enabled: false },
+          // Etiqueta de dato nativa de ApexCharts: se centra automáticamente
+          // sobre cada barra (a diferencia de la anotación manual anterior,
+          // que usaba un offsetX fijo en píxeles y no quedaba centrada con
+          // distintos anchos de contenedor o cantidades de categorías).
+          // El CSS global fuerza fill:#fff !important en .apexcharts-datalabel
+          // -por diseño, para que el valor siempre sea legible sobre una
+          // superficie de color-, así que el texto va apoyado en la parte
+          // superior de la barra en vez de flotar sobre el fondo blanco,
+          // donde el blanco forzado sería invisible.
+          dataLabels: {
+            enabled: true,
+            formatter: (val) => val == null ? '' : fmtCurrency(val),
+            style: { fontSize: '10px', fontWeight: 700 },
+            background: { enabled: false },
+            offsetY: -4
+          },
           xaxis: {
             type: 'category',
             categories: categories,
@@ -7857,7 +7813,7 @@ function switchDualChart(tab) {
             }
           },
           annotations: {
-            points: buildGroupedBarAnnotations(categories, ingresos, egresos, 0)
+            points: []
           }
         });
 
@@ -7865,6 +7821,12 @@ function switchDualChart(tab) {
           requestAnimationFrame(() => {
             forceChartResize(charts.ingVsEgr);
           });
+          // ApexCharts redibuja este gráfico por sí solo poco después del primer
+          // render (por redrawOnParentResize) y, en esta versión, ese redibujado
+          // automático descoloca las barras agrupadas dejándolas superpuestas en
+          // vez de una junto a la otra. Forzamos una segunda pasada después de
+          // ese punto para que el agrupado quede correcto y no vuelva a romperse.
+          setTimeout(() => forceChartResize(charts.ingVsEgr), 400);
         });
 
         setChartEmpty('emptyIngVsEgr', categories.length === 0 || (ingresos.length === 0 && egresos.length === 0));
@@ -7911,7 +7873,13 @@ function renderDistribucionGastos(gastos){
   rows.forEach((item,i)=>{const pct=item.monto/total*100,pctText=pct.toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:1})+'%';const row=document.createElement('div');row.className='expense-bar-item';row.setAttribute('role','button');row.tabIndex=0;
     const meta=document.createElement('div');meta.className='expense-bar-meta';const cat=document.createElement('span');cat.className='expense-bar-category';cat.textContent=item.categoria;const amt=document.createElement('span');amt.className='expense-bar-amount';amt.textContent=`${fmtCurrency(item.monto)} (${pctText})`;meta.append(cat,amt);
     const track=document.createElement('div');track.className='expense-bar-track';const fill=document.createElement('div');fill.className='expense-bar-fill';fill.style.width=Math.min(100,pct)+'%';fill.style.background=gradients[Math.min(i,gradients.length-1)];track.appendChild(fill);const pe=document.createElement('div');pe.className='expense-bar-pct';pe.textContent=pctText;row.append(meta,track,pe);
-    const apply=()=>filterTableByChart('categoria',item.categoria,{tipo:(document.getElementById('filtroTipo')||{}).value==='Ingreso'?'Ingreso':'Egreso',chartCardId:'chart-distribucion'});row.addEventListener('click',apply);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();apply();}});bars.appendChild(row);
+    const tipoActual=(document.getElementById('filtroTipo')||{}).value==='Ingreso'?'Ingreso':'Egreso';
+    const apply=()=>filterTableByChart('categoria',item.categoria,{tipo:tipoActual,chartCardId:'chart-distribucion'});row.addEventListener('click',apply);row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();apply();}});
+    // Mismo tooltip flotante (Top 3 transacciones) que ya usan Medio de Pago y
+    // Cierre Mensual, ahora también sobre las barras visibles de esta tarjeta.
+    row.addEventListener('mouseenter',e=>showTxTooltip('categoria',item.categoria,e.clientX,e.clientY,{tipo:tipoActual,chartCardId:'chart-distribucion'}));
+    row.addEventListener('mouseleave',hideTxTooltip);
+    bars.appendChild(row);
   });
 }
 
