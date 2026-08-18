@@ -2070,6 +2070,15 @@
         padding: 8px 10px;
         align-items: center;
       }
+      /* #descriptiveView/#forecastView usan position:absolute con un "top"
+         fijo pensado para el header de una sola fila (54px). En modo móvil
+         el header pasa a 2 filas (chips arriba, botones abajo) y crece a
+         ~88px; sin este ajuste la primera tarjeta (Ingresos) queda tapada
+         debajo del header. */
+      body.mobile-mode #descriptiveView,
+      body.mobile-mode #forecastView {
+        top: 88px;
+      }
       body.mobile-mode .header-left,
       body.mobile-mode .header-right {
         width: 100%;
@@ -2343,6 +2352,8 @@
     @media (max-width: 390px) {
       body.mobile-mode .canvas-body { padding: 8px; }
       body.mobile-mode .top-header { min-height: 96px; }
+      body.mobile-mode #descriptiveView,
+      body.mobile-mode #forecastView { top: 96px; }
       body.mobile-mode .kpi-row-169 { gap: 7px; }
       body.mobile-mode .kpi-card-169 { padding: 9px; }
       body.mobile-mode .kpi-value-169 { font-size: 16px; }
@@ -5121,6 +5132,12 @@
         // switchDualChart) podían solaparse a mitad de transición y dejar
         // las etiquetas de dato con un efecto de "doble exposición".
         try { chart.updateOptions({}, true, false); } catch (_) {}
+        // Ingresos vs Egresos dibuja sus etiquetas como tarjetas HTML propias
+        // (posicionadas desde la geometría real de cada barra), así que hay
+        // que recalcularlas cada vez que este gráfico se redimensiona.
+        if (chart === charts.ingVsEgr) {
+          requestAnimationFrame(() => requestAnimationFrame(renderIngVsEgrDataLabels));
+        }
       }
 
       let responsiveChartResizeTimer = null;
@@ -5770,9 +5787,14 @@
         setChartWidth("#chartIngVsEgrMesCanvas", ivCats.length, 50);
         charts.ingVsEgr.updateOptions({ xaxis: { categories: ivCats } }, false, false);
         charts.ingVsEgr.updateSeries([{ name: 'Ingresos', data: ivIng }, { name: 'Egresos', data: ivEgr }], false);
-        // Las etiquetas de dato son nativas de ApexCharts (ver switchDualChart)
-        // y se actualizan solas con updateSeries; ya no requieren anotaciones
-        // manuales por punto.
+        // Las etiquetas son tarjetas HTML propias (ver renderIngVsEgrDataLabels);
+        // se recalculan aquí porque updateSeries no pasa por forceChartResize.
+        // La segunda pasada con retraso es necesaria: el mismo redibujado
+        // automático interno de ApexCharts (ver forceChartResize) puede
+        // volver a descolocar barras/tarjetas justo después de este cambio
+        // de datos, no solo después del render inicial en switchDualChart.
+        requestAnimationFrame(() => requestAnimationFrame(renderIngVsEgrDataLabels));
+        setTimeout(() => forceChartResize(charts.ingVsEgr), 450);
 
         // Empty states en gráficos
         const hasEvol = (data.charts.evolucion.ingresos || []).length > 0 || (data.charts.evolucion.egresos || []).length > 0;
@@ -7479,6 +7501,14 @@
               chart:  { foreColor: textColor }
             }, true, false, true, true);
           });
+          // Ingresos vs Egresos dibuja sus etiquetas como tarjetas HTML propias
+          // (ver renderIngVsEgrDataLabels); este updateOptions() también puede
+          // descolocarlas/borrarlas igual que cualquier otro redibujado, así
+          // que se recalculan aquí con el mismo patrón de doble pasada.
+          if (charts.ingVsEgr) {
+            requestAnimationFrame(() => requestAnimationFrame(renderIngVsEgrDataLabels));
+            setTimeout(() => forceChartResize(charts.ingVsEgr), 450);
+          }
           // Donut: actualizar color del label "Total" en el centro
           if (charts.distribucion) {
             charts.distribucion.updateOptions({
@@ -7679,6 +7709,59 @@
       });
     
 
+// Etiqueta de dato tipo "tarjeta" (píldora de color + texto blanco), con el
+// mismo estilo visual que "💳 Gasto por Medio de Pago". A diferencia de ese
+// gráfico, este es agrupado (2 series comparten categoría), así que en vez
+// de anotaciones con un offsetX fijo en píxeles -que no quedaban centradas
+// con distintos anchos de contenedor- se calcula la posición desde la
+// geometría real ya renderizada de cada barra.
+function renderIngVsEgrDataLabels() {
+  const chart = charts.ingVsEgr;
+  const canvas = document.getElementById('chartIngVsEgrMesCanvas');
+  if (!chart || !canvas) return;
+  if (getComputedStyle(canvas).position === 'static') canvas.style.position = 'relative';
+  canvas.querySelectorAll('.ive-data-chip').forEach(el => el.remove());
+
+  const canvasRect = canvas.getBoundingClientRect();
+  if (!canvasRect.width || !canvasRect.height) return;
+  const seriesConfig = (chart.w && chart.w.config && chart.w.config.series) || [];
+  const seriesColors = [COLORS.ingreso, COLORS.egreso];
+  const seriesGroups = canvas.querySelectorAll('.apexcharts-series');
+
+  seriesGroups.forEach((g, si) => {
+    const values = (seriesConfig[si] && seriesConfig[si].data) || [];
+    const bars = g.querySelectorAll('path.apexcharts-bar-area');
+    bars.forEach((barPath, di) => {
+      const val = Number(values[di]);
+      if (!Number.isFinite(val)) return;
+      const bb = barPath.getBoundingClientRect();
+      if (!bb.width || !bb.height) return;
+      const chip = document.createElement('span');
+      chip.className = 'ive-data-chip';
+      chip.textContent = fmtCurrency(val);
+      const left = bb.left - canvasRect.left + bb.width / 2;
+      const top  = bb.top  - canvasRect.top;
+      chip.style.cssText = [
+        'position:absolute',
+        'left:' + Math.round(left) + 'px',
+        'top:' + Math.round(top) + 'px',
+        'transform:translate(-50%, calc(-100% - 6px))',
+        'background:' + (seriesColors[si] || COLORS.blue),
+        'color:#fff',
+        'font-size:10px',
+        'font-weight:700',
+        'padding:2px 6px',
+        'border-radius:4px',
+        'pointer-events:none',
+        'white-space:nowrap',
+        'z-index:5',
+        'line-height:1.4'
+      ].join(';');
+      canvas.appendChild(chip);
+    });
+  });
+}
+
 function switchDualChart(tab) {
   activeDualTab = tab;
   const isCierre = tab === 'cierre';
@@ -7756,26 +7839,16 @@ function switchDualChart(tab) {
             bar: {
               horizontal: false,
               columnWidth: '45%',
-              borderRadius: 3,
-              dataLabels: { position: 'top' }
+              borderRadius: 3
             }
           },
-          // Etiqueta de dato nativa de ApexCharts: se centra automáticamente
-          // sobre cada barra (a diferencia de la anotación manual anterior,
-          // que usaba un offsetX fijo en píxeles y no quedaba centrada con
-          // distintos anchos de contenedor o cantidades de categorías).
-          // El CSS global fuerza fill:#fff !important en .apexcharts-datalabel
-          // -por diseño, para que el valor siempre sea legible sobre una
-          // superficie de color-, así que el texto va apoyado en la parte
-          // superior de la barra en vez de flotar sobre el fondo blanco,
-          // donde el blanco forzado sería invisible.
-          dataLabels: {
-            enabled: true,
-            formatter: (val) => val == null ? '' : fmtCurrency(val),
-            style: { fontSize: '10px', fontWeight: 700 },
-            background: { enabled: false },
-            offsetY: -4
-          },
+          // Las etiquetas de dato se dibujan como tarjetas HTML propias (ver
+          // renderIngVsEgrDataLabels), con el mismo estilo que "Gasto por
+          // Medio de Pago". Se desactivan las nativas de ApexCharts: el CSS
+          // global las fuerza a blanco (fill:#fff !important, para que sean
+          // legibles sobre una superficie de color), lo que las deja
+          // invisibles si flotan sobre el fondo blanco encima de la barra.
+          dataLabels: { enabled: false },
           xaxis: {
             type: 'category',
             categories: categories,
